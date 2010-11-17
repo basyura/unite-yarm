@@ -1,3 +1,8 @@
 yet another redmine source for unite
 
 " 本家がないので yet も糞もないけど、もっといいのが出てくることを期待して
+
+設定
+  let g:unite_yarm_server_url = 'http://localhost:3000'
+必要なもの
+  webapi-vim https://github.com/mattn/webapi-vim.git
