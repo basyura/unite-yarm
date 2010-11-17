@@ -32,10 +32,7 @@ let s:unite_source.default_action = {'common' : 'open_issue'}
 let s:unite_source.action_table = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
-  
-  let issues = s:get_issues()
-
-  return map(issues, '{
+  return map(s:get_issues() , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
@@ -90,9 +87,8 @@ function! s:get_issues()
   if exists('g:unite_yarm_access_key')
     let url = url . '?key=' . g:unite_yarm_access_key
   endif
-  let xml = xml#parseURL(url)
   let issues = []
-  for dom in xml.childNodes('issue')
+  for dom in xml#parseURL(url).childNodes('issue')
     call add(issues , s:to_issue(dom))
   endfor
   return issues
