@@ -28,7 +28,7 @@ endif
 
 let s:unite_source = {}
 let s:unite_source.name = 'redmine'
-let s:unite_source.default_action = {'word' : 'open_issue'}
+let s:unite_source.default_action = {'common' : 'open_issue'}
 let s:unite_source.action_table = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
@@ -38,17 +38,16 @@ function! s:unite_source.gather_candidates(args, context)
   return map(issues, '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
-        \ "kind"          : "word",
         \ "source__issue" : v:val,
         \ }')
 endfunction
 " action table
 let s:action_table = {}
-let s:unite_source.action_table.word = s:action_table
+let s:unite_source.action_table.common = s:action_table
 " action - open_issue
 let s:action_table.open_issue = {'description' : 'open issue'}
 function! s:action_table.open_issue.func(candidate)
-  let issue = a:candidate.issue
+  let issue = a:candidate.source__issue
   exec 'new redmine_' . issue.id
   setlocal buftype=nofile
   setlocal bufhidden=hide
