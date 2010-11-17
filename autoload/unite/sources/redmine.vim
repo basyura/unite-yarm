@@ -54,26 +54,27 @@ function! s:action_table.open_issue.func(candidate)
   setlocal noswapfile
   setlocal fileencoding=utf-8 
   setfiletype redmine
-  silent execute 'normal i' . '<< ' . issue.project . 
-        \ ' - #' .issue.id
-        \ ' ' . issue.subject . '>>'
-  silent execute 'normal o' . 'tracker         : ' . issue.tracker
-  silent execute 'normal o' . 'status          : ' . issue.status
-  silent execute 'normal o' . 'priority        : ' . issue.priority
-  silent execute 'normal o' . 'author          : ' . issue.author
-  silent execute 'normal o' . 'start_date      : ' . issue.start_date
-  silent execute 'normal o' . 'due_date        : ' . issue.due_date
-  silent execute 'normal o' . 'estimated_hours : ' . issue.estimated_hours
-  silent execute 'normal o' . 'done_ratio      : ' . issue.done_ratio
-  silent execute 'normal o' . 'created_on      : ' . issue.created_on
-  silent execute 'normal o' . 'updated_on      : ' . issue.updated_on
-  silent execute 'normal o' . ''
-  silent execute 'normal o' . ''
-  " is this ok?
+  " append issue's fields
+  call append(0 , [
+      \ '<< ' . issue.project . ' - #' .issue.id . ' ' . issue.subject . '>>' ,
+      \ 'tracker         : ' . issue.tracker ,
+      \ 'status          : ' . issue.status ,
+      \ 'priority        : ' . issue.priority ,
+      \ 'author          : ' . issue.author ,
+      \ 'start_date      : ' . issue.start_date ,
+      \ 'due_date        : ' . issue.due_date ,
+      \ 'estimated_hours : ' . issue.estimated_hours ,
+      \ 'done_ratio      : ' . issue.done_ratio ,
+      \ 'created_on      : ' . issue.created_on ,
+      \ 'updated_on      : ' . issue.updated_on ,
+      \ '' 
+      \ ])
+  " is this ok? => append だと改行コードが出ちゃう・・・
   for line in split(issue.description,"\n")
     silent execute 'normal i' . line
   endfor
-        
+  " move cursor to top
+  normal! 1G
 endfunction
 
 " source
