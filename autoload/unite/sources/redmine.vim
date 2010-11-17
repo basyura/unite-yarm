@@ -89,8 +89,7 @@ function! s:get_issues()
   if exists('g:unite_yarm_access_key')
     let url = url . '?key=' . g:unite_yarm_access_key
   endif
-  let res = http#get(url)
-  let xml = xml#parse(res.content)
+  let xml = xml#parseURL(url)
   let issues = []
   for dom in xml.childNodes('issue')
     call add(issues , s:to_issue(dom))
