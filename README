@@ -4,5 +4,6 @@ yet another redmine source for unite
 
 設定
   let g:unite_yarm_server_url = 'http://localhost:3000'
+  let g:unite_yarm_access_key = 'your API access key'
 必要なもの
   webapi-vim https://github.com/mattn/webapi-vim.git

@@ -86,7 +86,11 @@ endfunction
 " private functions
 
 function! s:get_issues()
-  let res = http#get(g:unite_yarm_server_url . '/issues.xml')
+  let url = g:unite_yarm_server_url . '/issues.xml'
+  if exists('g:unite_yarm_access_key')
+    let url = url . '?key=' . g:unite_yarm_access_key
+  endif
+  let res = http#get(url)
   let xml = xml#parse(res.content)
   let issues = []
   for dom in xml.childNodes('issue')
