@@ -36,10 +36,10 @@ function! s:unite_source.gather_candidates(args, context)
   let issues = s:get_issues()
 
   return map(issues, '{
-        \ "word"   : v:val.unite_word,
-        \ "source" : "redmine",
-        \ "kind"   : "word",
-        \ "issue"  : v:val,
+        \ "word"          : v:val.unite_word,
+        \ "source"        : "redmine",
+        \ "kind"          : "word",
+        \ "source__issue" : v:val,
         \ }')
 endfunction
 " action table
