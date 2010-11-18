@@ -107,8 +107,24 @@ function! unite#sources#redmine#define()
 endfunction
 
 
-" private functions
+augroup RedmineGroup
+  autocmd! RedmineGroup
+  autocmd FileType redmine call s:redmine_issue_settings()
+augroup END  
 
+function! s:redmine_issue_settings()
+  nmap <silent> <buffer> <CR> :call <SID>redmine_issue_buffer_action()<CR>
+endfunction
+
+function! s:redmine_issue_buffer_action()
+  let matched = matchlist(expand('<cWORD>') , 'https\+://\S\+')
+  if len(matched) != 0
+    execute "OpenBrowser " . matched[0]
+  endif
+endfunction
+
+
+" private functions
 function! s:get_issues()
   let url = g:unite_yarm_server_url . '/issues.xml?' . 
                   \ 'per_page=' . g:unite_yarm_per_page
