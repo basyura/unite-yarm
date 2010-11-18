@@ -14,6 +14,8 @@ yet another redmine source for unite
     vim でチケットを開く
   browser
     ブラウザでチケットを開く
+  reget
+    チケットを取り直す
 
 設定
 
