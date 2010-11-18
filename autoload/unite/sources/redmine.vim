@@ -79,16 +79,7 @@ endfunction
 "
 let s:action_table.reget = {'description' : 'reget issue'}
 function! s:action_table.reget.func(candidate)
-  let id    = a:candidate.source__id
-  let issue = s:get_issue(id)
-  for cache in s:candidates_cache
-    if cache.source__id == id
-      let cache.word          = issue.unite_word
-      let cache.source__issue = issue
-      break
-    endif
-  endfor
-  call s:load_issue(issue)
+  call s:load_issue(s:reget_issue(a:candidate.source__id))
 endfunction
 
 
@@ -182,6 +173,20 @@ endfunction
 function! s:open_browser_with_issue(issue)
   let url   = g:unite_yarm_server_url . '/issues/' . a:issue.id
   execute "OpenBrowser " . url
+endfunction
+"
+" reget issue
+"
+function! s:reget_issue(id)
+  let issue = s:get_issue(a:id)
+  for cache in s:candidates_cache
+    if cache.source__id == a:id
+      let cache.word          = issue.unite_word
+      let cache.source__issue = issue
+      break
+    endif
+  endfor
+  return issue
 endfunction
 
 function! s:to_issue(xml)
