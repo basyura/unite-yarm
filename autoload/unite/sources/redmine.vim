@@ -21,17 +21,19 @@
 "     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 "     THE SOFTWARE.
 " }}}
-
+"
+" variables
+"
 if !exists('g:unite_yarm_server_url')
   let g:unite_yarm_server_url = 'http://localhost:3000'
 endif
-
+"
 if !exists('g:unite_yarm_per_page')
   let g:unite_yarm_per_page = 25
 endif
 " cache
 let s:candidates_cache = []
-
+"
 let s:unite_source = {}
 let s:unite_source.name = 'redmine'
 let s:unite_source.default_action = {'common' : 'open'}
@@ -57,7 +59,9 @@ function! s:unite_source.gather_candidates(args, context)
 
   return s:candidates_cache
 endfunction
+"
 " action table
+"
 let s:action_table = {}
 let s:unite_source.action_table.common = s:action_table
 " 
@@ -81,14 +85,15 @@ let s:action_table.reget = {'description' : 'reget issue'}
 function! s:action_table.reget.func(candidate)
   call s:load_issue(s:reget_issue(a:candidate.source__id))
 endfunction
-
-
+"
 " source
+"
 function! unite#sources#redmine#define()
   return s:unite_source
 endfunction
-
-
+"
+" autocmd
+"
 augroup RedmineGroup
   autocmd! RedmineGroup
   autocmd FileType redmine call s:redmine_issue_settings()
@@ -188,7 +193,9 @@ function! s:reget_issue(id)
   endfor
   return issue
 endfunction
-
+"
+" xml to issue
+"
 function! s:to_issue(xml)
   " i want this to be inner function
   function! s:to_value(v)
