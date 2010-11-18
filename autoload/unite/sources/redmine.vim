@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.0.1
-" Last Change: 17 Nov 2010
+" Last Change: 18 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,6 +51,7 @@ function! s:unite_source.gather_candidates(args, context)
         \ map(s:get_issues() , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
+        \ "source__id"    : v:val.id,
         \ "source__issue" : v:val,
         \ }')
 
@@ -59,47 +60,37 @@ endfunction
 " action table
 let s:action_table = {}
 let s:unite_source.action_table.common = s:action_table
+" 
 " action - open
+"
 let s:action_table.open = {'description' : 'open issue'}
 function! s:action_table.open.func(candidate)
-  let issue = a:candidate.source__issue
-  exec 'new redmine_' . issue.id
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  setlocal fileencoding=utf-8 
-  setlocal fileformat=unix
-  setfiletype redmine
-  " append issue's fields
-  call append(0 , [
-      \ '<< ' . issue.project . ' - #' .issue.id . ' ' . issue.subject . ' >>' ,
-      \ 'tracker         : ' . issue.tracker ,
-      \ 'status          : ' . issue.status ,
-      \ 'priority        : ' . issue.priority ,
-      \ 'author          : ' . issue.author ,
-      \ 'start_date      : ' . issue.start_date ,
-      \ 'due_date        : ' . issue.due_date ,
-      \ 'estimated_hours : ' . issue.estimated_hours ,
-      \ 'done_ratio      : ' . issue.done_ratio ,
-      \ 'created_on      : ' . issue.created_on ,
-      \ 'updated_on      : ' . issue.updated_on ,
-      \ '' 
-      \ ])
-  " is this ok? => append だと改行コードが出ちゃう・・・
-  for line in split(issue.description,"\n")
-    "silent execute 'normal i' . line
-    call append(line('$') , line)
-  endfor
-  " move cursor to top
-  normal! 1G
+  call s:load_issue(a:candidate.source__issue)
 endfunction
-
+"
+" action - browser
+"
 let s:action_table.browser = {'description' : 'open issue with browser'}
 function! s:action_table.browser.func(candidate)
-  let issue = a:candidate.source__issue
-  let url   = g:unite_yarm_server_url . '/issues/' . issue.id
-  execute "OpenBrowser " . url
+  call s:open_browser_with_issue(a:candidate.source__issue)
 endfunction
+"
+" action - reget
+"
+let s:action_table.reget = {'description' : 'reget issue'}
+function! s:action_table.reget.func(candidate)
+  let id    = a:candidate.source__id
+  let issue = s:get_issue(id)
+  for cache in s:candidates_cache
+    if cache.source__id == id
+      let cache.word          = issue.unite_word
+      let cache.source__issue = issue
+      break
+    endif
+  endfor
+  call s:load_issue(issue)
+endfunction
+
 
 " source
 function! unite#sources#redmine#define()
@@ -124,7 +115,11 @@ function! s:redmine_issue_buffer_action()
 endfunction
 
 
-" private functions
+" - private functions -
+
+"
+" get issues with api
+"
 function! s:get_issues()
   let url = g:unite_yarm_server_url . '/issues.xml?' . 
                   \ 'per_page=' . g:unite_yarm_per_page
@@ -136,6 +131,57 @@ function! s:get_issues()
     call add(issues , s:to_issue(dom))
   endfor
   return issues
+endfunction
+"
+" get issue with api
+"
+function! s:get_issue(id)
+  let url = g:unite_yarm_server_url . '/issues/' . a:id . '.xml'
+  if exists('g:unite_yarm_access_key')
+    let url = url . '?key=' . g:unite_yarm_access_key
+  endif
+  return s:to_issue(xml#parseURL(url))
+endfunction
+"
+" load issue to buffer
+"
+function! s:load_issue(issue)
+  exec 'new redmine_' . a:issue.id
+  setlocal buftype=nofile
+  setlocal bufhidden=hide
+  setlocal noswapfile
+  setlocal fileencoding=utf-8 
+  setlocal fileformat=unix
+  setfiletype redmine
+  " append issue's fields
+  call append(0 , [
+      \ '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>' ,
+      \ 'tracker         : ' . a:issue.tracker ,
+      \ 'status          : ' . a:issue.status ,
+      \ 'priority        : ' . a:issue.priority ,
+      \ 'author          : ' . a:issue.author ,
+      \ 'start_date      : ' . a:issue.start_date ,
+      \ 'due_date        : ' . a:issue.due_date ,
+      \ 'estimated_hours : ' . a:issue.estimated_hours ,
+      \ 'done_ratio      : ' . a:issue.done_ratio ,
+      \ 'created_on      : ' . a:issue.created_on ,
+      \ 'updated_on      : ' . a:issue.updated_on ,
+      \ '' 
+      \ ])
+  " is this ok? => append だと改行コードが出ちゃう・・・
+  for line in split(a:issue.description,"\n")
+    "silent execute 'normal i' . line
+    call append(line('$') , line)
+  endfor
+  " move cursor to top
+  normal! 1G
+endfunction
+"
+" open browser with issue
+"
+function! s:open_browser_with_issue(issue)
+  let url   = g:unite_yarm_server_url . '/issues/' . a:issue.id
+  execute "OpenBrowser " . url
 endfunction
 
 function! s:to_issue(xml)
