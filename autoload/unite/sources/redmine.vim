@@ -26,6 +26,10 @@ if !exists('g:unite_yarm_server_url')
   let g:unite_yarm_server_url = 'http://localhost:3000'
 endif
 
+if !exists('g:unite_yarm_per_page')
+  let g:unite_yarm_per_page = 25
+endif
+
 let s:unite_source = {}
 let s:unite_source.name = 'redmine'
 let s:unite_source.default_action = {'common' : 'open_issue'}
@@ -50,6 +54,7 @@ function! s:action_table.open_issue.func(candidate)
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal fileencoding=utf-8 
+  setlocal fileformat=unix
   setfiletype redmine
   " append issue's fields
   call append(0 , [
@@ -68,7 +73,8 @@ function! s:action_table.open_issue.func(candidate)
       \ ])
   " is this ok? => append だと改行コードが出ちゃう・・・
   for line in split(issue.description,"\n")
-    silent execute 'normal i' . line
+    "silent execute 'normal i' . line
+    call append(line('$') , line)
   endfor
   " move cursor to top
   normal! 1G
@@ -83,9 +89,10 @@ endfunction
 " private functions
 
 function! s:get_issues()
-  let url = g:unite_yarm_server_url . '/issues.xml'
+  let url = g:unite_yarm_server_url . '/issues.xml?' . 
+                  \ 'per_page=' . g:unite_yarm_per_page
   if exists('g:unite_yarm_access_key')
-    let url = url . '?key=' . g:unite_yarm_access_key
+    let url = url . '&key=' . g:unite_yarm_access_key
   endif
   let issues = []
   for dom in xml#parseURL(url).childNodes('issue')
