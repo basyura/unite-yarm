@@ -1,9 +1,22 @@
 yet another redmine source for unite
 
-" 本家がないので yet も糞もないけど、もっといいのが出てくることを期待して
+  本家がないので yet も糞もないけど、もっといいのが出てくることを期待して
+
+使い方
+  Unite redmine
+    チケット一覧の表示(かつ、一覧をキャッシュ)
+    キャッシュがあればそれを表示
+  Unite redmine:!
+    キャッシュを破棄してチケットを取り直す
 
 設定
+
   let g:unite_yarm_server_url = 'http://localhost:3000'
+    サーバの url
+    
   let g:unite_yarm_access_key = 'your API access key'
+    認証に使用する API Access Key
+
 必要なもの
+
   webapi-vim https://github.com/mattn/webapi-vim.git

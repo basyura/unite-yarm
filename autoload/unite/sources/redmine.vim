@@ -29,6 +29,8 @@ endif
 if !exists('g:unite_yarm_per_page')
   let g:unite_yarm_per_page = 25
 endif
+" cache
+let s:candidates_cache = []
 
 let s:unite_source = {}
 let s:unite_source.name = 'redmine'
@@ -36,11 +38,23 @@ let s:unite_source.default_action = {'common' : 'open_issue'}
 let s:unite_source.action_table = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
-  return map(s:get_issues() , '{
+  " clear cache if Unite redmine:!
+  if len(a:args) > 0 && a:args[0] == '!'
+    let s:candidates_cache = []
+  endif
+  " return cache if exist
+  if !empty(s:candidates_cache)
+    return s:candidates_cache
+  endif
+  " cache issues
+  let s:candidates_cache = 
+        \ map(s:get_issues() , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
         \ }')
+
+  return s:candidates_cache
 endfunction
 " action table
 let s:action_table = {}
