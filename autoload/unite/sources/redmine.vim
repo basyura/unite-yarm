@@ -165,7 +165,7 @@ function! s:load_issue(issue)
     call append(line('$') , line)
   endfor
   " move cursor to top
-  normal! 1G
+  :1
 endfunction
 "
 " open browser with issue
