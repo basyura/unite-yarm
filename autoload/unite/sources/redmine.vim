@@ -34,7 +34,7 @@ let s:candidates_cache = []
 
 let s:unite_source = {}
 let s:unite_source.name = 'redmine'
-let s:unite_source.default_action = {'common' : 'open_issue'}
+let s:unite_source.default_action = {'common' : 'open'}
 let s:unite_source.action_table = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
@@ -59,9 +59,9 @@ endfunction
 " action table
 let s:action_table = {}
 let s:unite_source.action_table.common = s:action_table
-" action - open_issue
-let s:action_table.open_issue = {'description' : 'open issue'}
-function! s:action_table.open_issue.func(candidate)
+" action - open
+let s:action_table.open = {'description' : 'open issue'}
+function! s:action_table.open.func(candidate)
   let issue = a:candidate.source__issue
   exec 'new redmine_' . issue.id
   setlocal buftype=nofile
@@ -72,7 +72,7 @@ function! s:action_table.open_issue.func(candidate)
   setfiletype redmine
   " append issue's fields
   call append(0 , [
-      \ '<< ' . issue.project . ' - #' .issue.id . ' ' . issue.subject . '>>' ,
+      \ '<< ' . issue.project . ' - #' .issue.id . ' ' . issue.subject . ' >>' ,
       \ 'tracker         : ' . issue.tracker ,
       \ 'status          : ' . issue.status ,
       \ 'priority        : ' . issue.priority ,
@@ -92,6 +92,13 @@ function! s:action_table.open_issue.func(candidate)
   endfor
   " move cursor to top
   normal! 1G
+endfunction
+
+let s:action_table.browser = {'description' : 'open issue with browser'}
+function! s:action_table.browser.func(candidate)
+  let issue = a:candidate.source__issue
+  let url   = g:unite_yarm_server_url . '/issues/' . issue.id
+  execute "OpenBrowser " . url
 endfunction
 
 " source
