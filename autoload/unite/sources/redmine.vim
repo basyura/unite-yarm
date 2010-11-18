@@ -117,7 +117,7 @@ function! s:redmine_issue_settings()
 endfunction
 
 function! s:redmine_issue_buffer_action()
-  let matched = matchlist(expand('<cWORD>') , 'https\+://\S\+')
+  let matched = matchlist(expand('<cWORD>') , 'https\?://\S\+')
   if len(matched) != 0
     execute "OpenBrowser " . matched[0]
   endif
