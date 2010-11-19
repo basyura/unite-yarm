@@ -171,6 +171,7 @@ function! s:load_issue(issue)
   endfor
   " move cursor to top
   :1
+  stopinsert
 endfunction
 "
 " open browser with issue's id
