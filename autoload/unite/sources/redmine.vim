@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.0.1
-" Last Change: 18 Nov 2010
+" Last Change: 19 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,12 +32,12 @@ if !exists('g:unite_yarm_per_page')
   let g:unite_yarm_per_page = 25
 endif
 " cache
-let s:candidates_cache = []
+let s:candidates_cache  = []
 "
-let s:unite_source = {}
+let s:unite_source      = {}
 let s:unite_source.name = 'redmine'
 let s:unite_source.default_action = {'common' : 'open'}
-let s:unite_source.action_table = {}
+let s:unite_source.action_table   = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
   " clear cache if Unite redmine:!
@@ -76,7 +76,7 @@ endfunction
 "
 let s:action_table.browser = {'description' : 'open issue with browser'}
 function! s:action_table.browser.func(candidate)
-  call s:open_browser_with_issue(a:candidate.source__issue)
+  call s:open_browser(a:candidate.source__issue.id)
 endfunction
 "
 " action - reget
@@ -152,6 +152,7 @@ function! s:load_issue(issue)
   " append issue's fields
   call append(0 , [
       \ '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>' ,
+      \ '' ,
       \ 'tracker         : ' . a:issue.tracker ,
       \ 'status          : ' . a:issue.status ,
       \ 'priority        : ' . a:issue.priority ,
@@ -164,20 +165,18 @@ function! s:load_issue(issue)
       \ 'updated_on      : ' . a:issue.updated_on ,
       \ '' 
       \ ])
-  " is this ok? => append だと改行コードが出ちゃう・・・
+  " add description
   for line in split(a:issue.description,"\n")
-    "silent execute 'normal i' . line
     call append(line('$') , line)
   endfor
   " move cursor to top
   :1
 endfunction
 "
-" open browser with issue
+" open browser with issue's id
 "
-function! s:open_browser_with_issue(issue)
-  let url   = g:unite_yarm_server_url . '/issues/' . a:issue.id
-  execute "OpenBrowser " . url
+function! s:open_browser(id)
+  execute "OpenBrowser " . g:unite_yarm_server_url . '/issues/' . a:id
 endfunction
 "
 " reget issue
@@ -203,11 +202,11 @@ function! s:to_issue(xml)
   endfunction
   let issue = {
         \ 'id'              : s:to_value(a:xml.childNode('id').child) ,
-        \ 'project'         : a:xml.childNode('project').attr['name'] ,
-        \ 'tracker'         : a:xml.childNode('tracker').attr['name'] ,
-        \ 'status'          : a:xml.childNode('status').attr['name'] ,
-        \ 'priority'        : a:xml.childNode('priority').attr['name'] ,
-        \ 'author'          : a:xml.childNode('author').attr['name'] ,
+        \ 'project'         : s:decode(a:xml.childNode('project').attr['name']) ,
+        \ 'tracker'         : s:decode(a:xml.childNode('tracker').attr['name']) ,
+        \ 'status'          : s:decode(a:xml.childNode('status').attr['name']) ,
+        \ 'priority'        : s:decode(a:xml.childNode('priority').attr['name']) ,
+        \ 'author'          : s:decode(a:xml.childNode('author').attr['name']) ,
         \ 'subject'         : s:to_value(a:xml.childNode('subject').child) ,
         \ 'description'     : s:to_value(a:xml.childNode('description').child) ,
         \ 'start_date'      : s:to_value(a:xml.childNode('start_date').child) ,
@@ -220,5 +219,38 @@ function! s:to_issue(xml)
   let issue.unite_word = '#' . issue.id . ' ' . issue.subject
 
   return issue
+endfunction
+"
+" from xml.vim at webapi.vim
+" 一時的にお借りします
+"
+function! s:decode(str)
+  let str = a:str
+  let str = substitute(str, '&gt;', '>', 'g')
+  let str = substitute(str, '&lt;', '<', 'g')
+  let str = substitute(str, '&#\(\d\+\);', '\=s:nr2enc_char(submatch(1))', 'g')
+  let str = substitute(str, '&amp;', '\&', 'g')
+  return str
+endfunction
+
+function! s:nr2byte(nr)
+  if a:nr < 0x80
+    return nr2char(a:nr)
+  elseif a:nr < 0x800
+    return nr2char(a:nr/64+192).nr2char(a:nr%64+128)
+  else
+    return nr2char(a:nr/4096%16+224).nr2char(a:nr/64%64+128).nr2char(a:nr%64+128)
+  endif
+endfunction
+
+function! s:nr2enc_char(charcode)
+  if &encoding == 'utf-8'
+    return nr2char(a:charcode)
+  endif
+  let char = s:nr2byte(a:charcode)
+  if strlen(char) > 1
+    let char = strtrans(iconv(char, 'utf-8', &encoding))
+  endif
+  return char
 endfunction
 
