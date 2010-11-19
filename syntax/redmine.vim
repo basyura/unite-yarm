@@ -22,10 +22,13 @@ syntax match redmine_field "^updated_on\s\+: "
 syntax match redmine_h2 "^h2\..*"
 syntax match redmine_h3 "^h3\..*"
 
+syntax region redmine_pre start="<pre>"  end="</pre>" 
+
 highlight default link redmine_title Statement
 highlight default link redmine_link  Underlined
 highlight default link redmine_field Constant
 highlight default link redmine_h2    Underlined
 highlight default link redmine_h3    Statement
+highlight default link redmine_pre   Type
 
 let b:current_syntax = 'redmine'
