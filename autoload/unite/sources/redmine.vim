@@ -202,11 +202,11 @@ function! s:to_issue(xml)
   endfunction
   let issue = {
         \ 'id'              : s:to_value(a:xml.childNode('id').child) ,
-        \ 'project'         : s:decode(a:xml.childNode('project').attr['name']) ,
-        \ 'tracker'         : s:decode(a:xml.childNode('tracker').attr['name']) ,
-        \ 'status'          : s:decode(a:xml.childNode('status').attr['name']) ,
-        \ 'priority'        : s:decode(a:xml.childNode('priority').attr['name']) ,
-        \ 'author'          : s:decode(a:xml.childNode('author').attr['name']) ,
+        \ 'project'         : a:xml.childNode('project').attr['name'] ,
+        \ 'tracker'         : a:xml.childNode('tracker').attr['name'] ,
+        \ 'status'          : a:xml.childNode('status').attr['name'] ,
+        \ 'priority'        : a:xml.childNode('priority').attr['name'] ,
+        \ 'author'          : a:xml.childNode('author').attr['name'] ,
         \ 'subject'         : s:to_value(a:xml.childNode('subject').child) ,
         \ 'description'     : s:to_value(a:xml.childNode('description').child) ,
         \ 'start_date'      : s:to_value(a:xml.childNode('start_date').child) ,
@@ -220,37 +220,3 @@ function! s:to_issue(xml)
 
   return issue
 endfunction
-"
-" from xml.vim at webapi.vim
-" 一時的にお借りします
-"
-function! s:decode(str)
-  let str = a:str
-  let str = substitute(str, '&gt;', '>', 'g')
-  let str = substitute(str, '&lt;', '<', 'g')
-  let str = substitute(str, '&#\(\d\+\);', '\=s:nr2enc_char(submatch(1))', 'g')
-  let str = substitute(str, '&amp;', '\&', 'g')
-  return str
-endfunction
-
-function! s:nr2byte(nr)
-  if a:nr < 0x80
-    return nr2char(a:nr)
-  elseif a:nr < 0x800
-    return nr2char(a:nr/64+192).nr2char(a:nr%64+128)
-  else
-    return nr2char(a:nr/4096%16+224).nr2char(a:nr/64%64+128).nr2char(a:nr%64+128)
-  endif
-endfunction
-
-function! s:nr2enc_char(charcode)
-  if &encoding == 'utf-8'
-    return nr2char(a:charcode)
-  endif
-  let char = s:nr2byte(a:charcode)
-  if strlen(char) > 1
-    let char = strtrans(iconv(char, 'utf-8', &encoding))
-  endif
-  return char
-endfunction
-
