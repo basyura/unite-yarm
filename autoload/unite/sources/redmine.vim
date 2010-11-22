@@ -142,7 +142,9 @@ endfunction
 " load issue to buffer
 "
 function! s:load_issue(issue)
-  exec 'new redmine_' . a:issue.id
+  "exec 'new redmine_' . a:issue.id
+  exec 'edit! redmine_' . a:issue.id
+  silent %delete _
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
