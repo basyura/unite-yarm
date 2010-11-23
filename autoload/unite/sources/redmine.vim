@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.0.1
-" Last Change: 19 Nov 2010
+" Last Change: 23 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,6 +31,12 @@ endif
 if !exists('g:unite_yarm_per_page')
   let g:unite_yarm_per_page = 25
 endif
+"
+" source
+"
+function! unite#sources#redmine#define()
+  return s:unite_source
+endfunction
 " cache
 let s:candidates_cache  = []
 "
@@ -53,7 +59,6 @@ function! s:unite_source.gather_candidates(args, context)
         \ map(s:get_issues() , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
-        \ "source__id"    : v:val.id,
         \ "source__issue" : v:val,
         \ }')
 
@@ -83,13 +88,7 @@ endfunction
 "
 let s:action_table.reget = {'description' : 'reget issue'}
 function! s:action_table.reget.func(candidate)
-  call s:load_issue(s:reget_issue(a:candidate.source__id))
-endfunction
-"
-" source
-"
-function! unite#sources#redmine#define()
-  return s:unite_source
+  call s:load_issue(s:reget_issue(a:candidate.source__issue.id))
 endfunction
 "
 " autocmd
@@ -187,7 +186,8 @@ endfunction
 function! s:reget_issue(id)
   let issue = s:get_issue(a:id)
   for cache in s:candidates_cache
-    if cache.source__id == a:id
+    " update cache
+    if cache.source__issue.id == a:id
       let cache.word          = issue.unite_word
       let cache.source__issue = issue
       break
