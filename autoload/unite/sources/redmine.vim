@@ -109,6 +109,17 @@ function! s:redmine_issue_buffer_action()
   endif
 endfunction
 
+function! s:redmine_put_issue()
+  if input('update ? (y/n) : ') != 'y'
+    echo 'update was canceled'
+    return
+  endif
+
+  let body = '<issue><description>' . join(getline(14,'$') , "\n") . '</description></issue>'
+  let res  = http#post(b:unite_yarm_put_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
+  echo 'updated - ' . res.header[0]
+  bdelete!
+endfunction
 
 " - private functions -
 
@@ -144,7 +155,7 @@ function! s:load_issue(issue)
   "exec 'new redmine_' . a:issue.id
   exec 'edit! redmine_' . a:issue.id
   silent %delete _
-  setlocal buftype=nofile
+  setlocal buftype=acwrite
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal fileencoding=utf-8 
@@ -170,6 +181,14 @@ function! s:load_issue(issue)
   for line in split(a:issue.description,"\n")
     call append(line('$') , line)
   endfor
+  setlocal nomodified
+  " variables for update
+  let b:unite_yarm_put_url = g:unite_yarm_server_url . '/issues/' . a:issue.id . '.xml?key=' . g:unite_yarm_access_key
+  " add put command
+  augroup RedmineBufCmdGroup
+    autocmd! RedmineBufCmdGroup
+    autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
+  augroup END
   " move cursor to top
   :1
   stopinsert
