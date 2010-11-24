@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.0.1
-" Last Change: 23 Nov 2010
+" Last Change: 24 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -115,11 +115,13 @@ function! s:redmine_put_issue()
     return
   endif
 
-  let body = '<issue><description>' . join(getline(14,'$') , "\n") . '</description></issue>'
+  let body = '<issue><description>' 
+        \ . join(getline(14,'$') , "\n") . '</description></issue>'
   let res  = http#post(b:unite_yarm_put_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
   " split HTTP/1.0 200 OK
   if split(res.header[0])[1] == '200'
-    echo 'updated'
+    call s:reget_issue(b:unite_yarm_issue_id)
+    echo 'updated issue #' . b:unite_yarm_issue_id . ' - ' . res.header[0]
     bdelete!
   else
     echo b:unite_yarm_put_url
@@ -187,7 +189,6 @@ function! s:load_issue(issue)
       \ 'done_ratio      : ' . a:issue.done_ratio ,
       \ 'created_on      : ' . a:issue.created_on ,
       \ 'updated_on      : ' . a:issue.updated_on ,
-      \ '' 
       \ ])
   " add description
   for line in split(a:issue.description,"\n")
@@ -201,7 +202,8 @@ function! s:load_issue(issue)
     setlocal buftype=acwrite
     setlocal nomodified
     " variables for update
-    let b:unite_yarm_put_url = g:unite_yarm_server_url . '/issues/' . a:issue.id . '.xml'
+    let b:unite_yarm_issue_id = a:issue.id
+    let b:unite_yarm_put_url  = g:unite_yarm_server_url . '/issues/' . a:issue.id . '.xml'
     if exists('g:unite_yarm_access_key')
       let b:unite_yarm_put_url .= '?key=' . g:unite_yarm_access_key
     endif
