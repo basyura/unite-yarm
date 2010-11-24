@@ -192,7 +192,7 @@ function! s:load_issue(issue)
       \ ])
   " add description
   for line in split(a:issue.description,"\n")
-    call append(line('$') , line)
+    call append(line('$') , substitute(line , '' , '' , 'g'))
   endfor
   " check access key.
   if !exists('g:unite_yarm_access_key')
