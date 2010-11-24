@@ -117,8 +117,14 @@ function! s:redmine_put_issue()
 
   let body = '<issue><description>' . join(getline(14,'$') , "\n") . '</description></issue>'
   let res  = http#post(b:unite_yarm_put_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
-  echo 'updated - ' . res.header[0]
-  bdelete!
+  " split HTTP/1.0 200 OK
+  if split(res.header[0])[1] == '200'
+    echo 'updated'
+    bdelete!
+  else
+    echo b:unite_yarm_put_url
+    echo res.header[0]
+  endif
 endfunction
 
 " - private functions -
@@ -130,10 +136,17 @@ function! s:get_issues()
   let url = g:unite_yarm_server_url . '/issues.xml?' . 
                   \ 'per_page=' . g:unite_yarm_per_page
   if exists('g:unite_yarm_access_key')
-    let url = url . '&key=' . g:unite_yarm_access_key
+    let url .= '&key=' . g:unite_yarm_access_key
   endif
   let issues = []
-  for dom in xml#parseURL(url).childNodes('issue')
+  let res = http#get(url)
+  " check status code
+  if split(res.header[0])[1] != '200'
+    echoerr res.header[0]
+    return []
+  endif
+  " convert xml to dict
+  for dom in xml#parse(res.content).childNodes('issue')
     call add(issues , s:to_issue(dom))
   endfor
   return issues
@@ -144,7 +157,7 @@ endfunction
 function! s:get_issue(id)
   let url = g:unite_yarm_server_url . '/issues/' . a:id . '.xml'
   if exists('g:unite_yarm_access_key')
-    let url = url . '?key=' . g:unite_yarm_access_key
+    let url .= '?key=' . g:unite_yarm_access_key
   endif
   return s:to_issue(xml#parseURL(url))
 endfunction
@@ -155,7 +168,6 @@ function! s:load_issue(issue)
   "exec 'new redmine_' . a:issue.id
   exec 'edit! redmine_' . a:issue.id
   silent %delete _
-  setlocal buftype=acwrite
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal fileencoding=utf-8 
@@ -181,14 +193,24 @@ function! s:load_issue(issue)
   for line in split(a:issue.description,"\n")
     call append(line('$') , line)
   endfor
-  setlocal nomodified
-  " variables for update
-  let b:unite_yarm_put_url = g:unite_yarm_server_url . '/issues/' . a:issue.id . '.xml?key=' . g:unite_yarm_access_key
-  " add put command
-  augroup RedmineBufCmdGroup
-    autocmd! RedmineBufCmdGroup
-    autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
-  augroup END
+  " check access key.
+  if !exists('g:unite_yarm_access_key')
+    setlocal buftype=nofile
+    setlocal nomodifiable
+  else
+    setlocal buftype=acwrite
+    setlocal nomodified
+    " variables for update
+    let b:unite_yarm_put_url = g:unite_yarm_server_url . '/issues/' . a:issue.id . '.xml'
+    if exists('g:unite_yarm_access_key')
+      let b:unite_yarm_put_url .= '?key=' . g:unite_yarm_access_key
+    endif
+    " add put command
+    augroup RedmineBufCmdGroup
+      autocmd! RedmineBufCmdGroup
+      autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
+    augroup END
+  endif
   " move cursor to top
   :1
   stopinsert
