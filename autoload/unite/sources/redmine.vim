@@ -123,7 +123,8 @@ function! s:redmine_put_issue()
     echohl ErrorMsg | echo 'issue #' . issue.id . ' is already updated' | echohl None
     return
   endif
-
+  " backup
+  call s:backup_issue(pre)
   " 最後の改行が削られるので \n を付ける
   let body  = '<issue><description>' 
                 \ . join(getline(14,'$') , "\n") . "\n"
@@ -246,6 +247,21 @@ function! s:reget_issue(id)
     endif
   endfor
   return issue
+endfunction
+"
+" backup issue
+"
+functio! s:backup_issue(issue)
+  if !exists('g:unite_yarm_backup_dir')
+    return
+  endif
+
+  let body = split(a:issue.description , "\n")
+  let path = g:unite_yarm_backup_dir . '/' . a:issue.id
+        \ . '.' . strftime('%Y%m%d%H%M%S')
+        \ . '.txt'
+  call writefile(body , path)
+
 endfunction
 "
 " xml to issue
