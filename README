@@ -46,3 +46,16 @@ yet another redmine source for unite
 
   open-browser.vim
     https://github.com/tyru/open-browser.vim
+
+チケット表示
+  
+  url
+    Enterで該当ページをブラウザで開く
+
+  :w or :wq
+    チケットを更新(サーバに put)
+    保存済みチケットと更新対象(キャッシュ)の
+    updated_on が一致しない場合は
+    既に他ユーザから更新されていると判断して更新を止める
+
+
