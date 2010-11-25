@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.0.1
-" Last Change: 24 Nov 2010
+" Last Change: 25 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy

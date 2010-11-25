@@ -3,17 +3,22 @@ yet another redmine source for unite
   本家がないので yet も糞もないけど、もっといいのが出てくることを期待して
 
 使い方
+
   Unite redmine
     チケット一覧の表示(かつ、一覧をキャッシュ)
     キャッシュがあればそれを表示
+
   Unite redmine:!
     キャッシュを破棄してチケットを取り直す
 
 アクション
+
   open
     vim でチケットを開く
+
   browser
     ブラウザでチケットを開く
+
   reget
     チケットを取り直す
 
@@ -24,13 +29,20 @@ yet another redmine source for unite
     
   let g:unite_yarm_access_key = 'your API access key'
     認証に使用する API Access Key
+    定義されていない場合は更新不可
+    更新できるのは redmine の head or stable branch を使用している場合だけ
 
   let g:unite_yarm_per_page = 25
     取得するチケットの数(25 or 50 or 100 しか効かないと思う)
+  
+  let g:unite_yarm_backup_dir = '/tmp/yarm'
+    バックアップ先ディレクトリ
+    定義されていない場合はバックアップしない
 
 必要なもの
 
   webapi-vim 
     https://github.com/mattn/webapi-vim.git
+
   open-browser.vim
     https://github.com/tyru/open-browser.vim
