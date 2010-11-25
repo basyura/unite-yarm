@@ -115,16 +115,21 @@ function! s:redmine_put_issue()
     return
   endif
 
-  let body = '<issue><description>' 
-        \ . join(getline(14,'$') , "\n") . '</description></issue>'
-  let res  = http#post(b:unite_yarm_put_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
+  let issue = b:unite_yarm_issue
+  " 最後の改行が削られるので \n を付ける
+  let body  = '<issue><description>' 
+                \ . join(getline(14,'$') , "\n") . "\n"
+                \ . '</description></issue>'
+  " put issue
+  let res   = http#post(issue.rest_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
   " split HTTP/1.0 200 OK
   if split(res.header[0])[1] == '200'
-    call s:reget_issue(b:unite_yarm_issue_id)
-    echo 'updated issue #' . b:unite_yarm_issue_id . ' - ' . res.header[0]
-    bdelete!
+    " :wq 保存して閉じる 
+    " :w  チケットを取り直して再描画
+    call s:load_issue(s:reget_issue(issue.id))
+    echo 'updated issue #' . issue.id . ' - ' . res.header[0]
   else
-    echo b:unite_yarm_put_url
+    echo b:issue.rest_url
     echo res.header[0]
   endif
 endfunction
@@ -201,12 +206,8 @@ function! s:load_issue(issue)
   else
     setlocal buftype=acwrite
     setlocal nomodified
-    " variables for update
-    let b:unite_yarm_issue_id = a:issue.id
-    let b:unite_yarm_put_url  = g:unite_yarm_server_url . '/issues/' . a:issue.id . '.xml'
-    if exists('g:unite_yarm_access_key')
-      let b:unite_yarm_put_url .= '?key=' . g:unite_yarm_access_key
-    endif
+    " cache issue for update
+    let b:unite_yarm_issue = a:issue
     " add put command
     augroup RedmineBufCmdGroup
       autocmd! RedmineBufCmdGroup
@@ -262,7 +263,14 @@ function! s:to_issue(xml)
         \ 'created_on'      : s:to_value(a:xml.childNode('created_on').child) ,
         \ 'updated_on'      : s:to_value(a:xml.childNode('updated_on').child) ,
         \}
+  " unite_word
   let issue.unite_word = '#' . issue.id . ' ' . issue.subject
+  " url for CRUD
+  let rest_url = g:unite_yarm_server_url . '/issues/' . issue.id . '.xml?format=xml'
+  if exists('g:unite_yarm_access_key')
+    let rest_url .= '&key=' . g:unite_yarm_access_key
+  endif
+  let issue.rest_url = rest_url
 
   return issue
 endfunction
