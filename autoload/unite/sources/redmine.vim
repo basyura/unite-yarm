@@ -31,6 +31,8 @@ endif
 if !exists('g:unite_yarm_per_page')
   let g:unite_yarm_per_page = 25
 endif
+" hi - source を読み込み直すと消えちゃう
+highlight yarm_ok guifg=white guibg=blue
 "
 " source
 "
@@ -55,13 +57,13 @@ function! s:unite_source.gather_candidates(args, context)
     return s:candidates_cache
   endif
   " cache issues
+  call s:info('now caching issues ...')
   let s:candidates_cache = 
         \ map(s:get_issues() , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
         \ }')
-
   return s:candidates_cache
 endfunction
 "
@@ -111,17 +113,17 @@ endfunction
 
 function! s:redmine_put_issue()
   if input('update ? (y/n) : ') != 'y'
-    echo 'update was canceled'
-    return
+    return s:info('update was canceled')
   endif
-
+  " cached issue
   let issue = b:unite_yarm_issue
+  " i want display progress
+  call s:info('now updating #' . issue.id . ' ...')
   " reget lastest issue
   let pre   = s:get_issue(issue.id)
   " check latest
   if pre.updated_on != issue.updated_on
-    echohl ErrorMsg | echo 'issue #' . issue.id . ' is already updated' | echohl None
-    return
+    return s:echoerr('issue #' . issue.id . ' is already updated')
   endif
   " backup
   call s:backup_issue(pre)
@@ -136,10 +138,10 @@ function! s:redmine_put_issue()
     " :wq 保存して閉じる 
     " :w  チケットを取り直して再描画
     call s:load_issue(s:reget_issue(issue.id))
-    echo 'updated issue #' . issue.id . ' - ' . res.header[0]
+    call s:info('#' . issue.id . ' - ' . res.header[0])
   else
-    echo b:issue.rest_url
-    echo res.header[0]
+    redraw
+    call s:error('failed - ' . res.header[0])
   endif
 endfunction
 
@@ -158,7 +160,7 @@ function! s:get_issues()
   let res = http#get(url)
   " check status code
   if split(res.header[0])[1] != '200'
-    echohl ErrorMsg | echo res.header[0] | echohl None
+    call s:error(res.header[0])
     return []
   endif
   " convert xml to dict
@@ -297,4 +299,18 @@ function! s:to_issue(xml)
   let issue.rest_url = rest_url
 
   return issue
+endfunction
+"
+" echo info log
+"
+function! s:info(msg)
+  echohl yarm_ok | echo a:msg | echohl None
+  return 1
+endfunction
+"
+" echo error log
+"
+function! s:error(msg)
+  echohl ErrorMsg | echo a:msg | echohl None
+  return 0
 endfunction
