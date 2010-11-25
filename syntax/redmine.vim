@@ -31,4 +31,6 @@ highlight default link yarm_h2    Underlined
 highlight default link yarm_h3    Statement
 highlight default link yarm_pre   Type
 
+highlight yarm_ok guifg=white guibg=blue
+
 let b:current_syntax = 'yarm'
