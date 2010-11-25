@@ -116,6 +116,14 @@ function! s:redmine_put_issue()
   endif
 
   let issue = b:unite_yarm_issue
+  " reget lastest issue
+  let pre   = s:get_issue(issue.id)
+  " check latest
+  if pre.updated_on != issue.updated_on
+    echohl ErrorMsg | echo 'issue #' . issue.id . ' is already updated' | echohl None
+    return
+  endif
+
   " 最後の改行が削られるので \n を付ける
   let body  = '<issue><description>' 
                 \ . join(getline(14,'$') , "\n") . "\n"
@@ -149,7 +157,7 @@ function! s:get_issues()
   let res = http#get(url)
   " check status code
   if split(res.header[0])[1] != '200'
-    echoerr res.header[0]
+    echohl ErrorMsg | echo res.header[0] | echohl None
     return []
   endif
   " convert xml to dict
