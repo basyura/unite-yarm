@@ -123,7 +123,8 @@ function! s:redmine_put_issue()
   let pre   = s:get_issue(issue.id)
   " check latest
   if pre.updated_on != issue.updated_on
-    return s:echoerr('issue #' . issue.id . ' is already updated')
+    redraw
+    return s:error('issue #' . issue.id . ' is already updated')
   endif
   " backup
   call s:backup_issue(pre)
