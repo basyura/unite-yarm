@@ -110,6 +110,13 @@ function! s:redmine_issue_buffer_action()
   let matched = matchlist(expand('<cWORD>') , 'https\?://\S\+')
   if len(matched) != 0
     echohl yarm_ok | execute "OpenBrowser " . matched[0] | echohl None
+    return
+  endif
+  let hiid = synIDattr(synID(line('.'),col('.'),1),'name')
+  " open issue
+  if hiid == 'yarm_title'
+    call s:open_browser(b:unite_yarm_issue.id)
+    return
   endif
 endfunction
 
