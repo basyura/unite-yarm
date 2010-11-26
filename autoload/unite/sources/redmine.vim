@@ -142,6 +142,7 @@ function! s:redmine_put_issue()
   if split(res.header[0])[1] == '200'
     " :wq 保存して閉じる 
     " :w  チケットを取り直して再描画
+    redraw
     call s:load_issue(s:reget_issue(issue.id))
     call s:info('#' . issue.id . ' - ' . res.header[0])
   else
