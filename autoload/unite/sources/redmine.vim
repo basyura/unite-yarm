@@ -1,6 +1,6 @@
 " redmine source for unite.vim
-" Version:     0.0.1
-" Last Change: 25 Nov 2010
+" Version:     0.1.0
+" Last Change: 26 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -90,7 +90,9 @@ endfunction
 "
 let s:action_table.reget = {'description' : 'reget issue'}
 function! s:action_table.reget.func(candidate)
-  call s:load_issue(s:reget_issue(a:candidate.source__issue.id))
+  let id = a:candidate.source__issue.id
+  call s:info('reget issue #' . id . ' ...')
+  call s:load_issue(s:reget_issue(id))
 endfunction
 "
 " autocmd
@@ -107,14 +109,16 @@ endfunction
 function! s:redmine_issue_buffer_action()
   let matched = matchlist(expand('<cWORD>') , 'https\?://\S\+')
   if len(matched) != 0
-    execute "OpenBrowser " . matched[0]
+    echohl yarm_ok | execute "OpenBrowser " . matched[0] | echohl None
   endif
 endfunction
 
 function! s:redmine_put_issue()
+  echohl yarm_ok
   if input('update ? (y/n) : ') != 'y'
     return s:info('update was canceled')
   endif
+  echohl None
   " cached issue
   let issue = b:unite_yarm_issue
   " i want display progress
@@ -234,7 +238,9 @@ endfunction
 " open browser with issue's id
 "
 function! s:open_browser(id)
+  echohl yarm_ok 
   execute "OpenBrowser " . g:unite_yarm_server_url . '/issues/' . a:id
+  echohl None
 endfunction
 "
 " reget issue
