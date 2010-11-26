@@ -313,8 +313,8 @@ endfunction
 function! s:escape(str)
   let str = a:str
   let str = substitute(str, '&', '\&amp;', 'g')
-  let str = substitute(str, '>', '\&gt;', 'g')
-  let str = substitute(str, '<', '\&lt;', 'g')
+  let str = substitute(str, '>', '\&gt;' , 'g')
+  let str = substitute(str, '<', '\&lt;' , 'g')
   let str = substitute(str, '"', '\&#34;', 'g')
   return str
 endfunction
