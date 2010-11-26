@@ -134,7 +134,7 @@ function! s:redmine_put_issue()
   call s:backup_issue(pre)
   " 最後の改行が削られるので \n を付ける
   let body  = '<issue><description>' 
-                \ . join(getline(14,'$') , "\n") . "\n"
+                \ . join(map(getline(14,'$') , "s:escape(v:val)") , "\n") . "\n"
                 \ . '</description></issue>'
   " put issue
   let res   = http#post(issue.rest_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
@@ -306,6 +306,17 @@ function! s:to_issue(xml)
   let issue.rest_url = rest_url
 
   return issue
+endfunction
+"
+" from xml.vim
+"
+function! s:escape(str)
+  let str = a:str
+  let str = substitute(str, '&', '\&amp;', 'g')
+  let str = substitute(str, '>', '\&gt;', 'g')
+  let str = substitute(str, '<', '\&lt;', 'g')
+  let str = substitute(str, '"', '\&#34;', 'g')
+  return str
 endfunction
 "
 " echo info log
