@@ -1,6 +1,6 @@
 " redmine source for unite.vim
-" Version:     0.1.0
-" Last Change: 26 Nov 2010
+" Version:     0.1.1
+" Last Change: 27 Nov 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -139,9 +139,12 @@ function! s:redmine_put_issue()
   endif
   " backup
   call s:backup_issue(pre)
+  " 2行目移行の改行だけの行移行を description とみなす
+  :2
+  let body_start = search('^$') + 1
   " 最後の改行が削られるので \n を付ける
   let body  = '<issue><description>' 
-                \ . join(map(getline(14,'$') , "s:escape(v:val)") , "\n") . "\n"
+                \ . join(map(getline(body_start,'$') , "s:escape(v:val)") , "\n") . "\n"
                 \ . '</description></issue>'
   " put issue
   let res   = http#post(issue.rest_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
@@ -219,6 +222,9 @@ function! s:load_issue(issue)
       \ 'created_on      : ' . a:issue.created_on ,
       \ 'updated_on      : ' . a:issue.updated_on ,
       \ ])
+  for custom in a:issue.custom_fileds
+    call append(line('$') - 1 , s:padding_right(custom.name , 15) . ' : ' . custom.value)
+  endfor
   " add description
   for line in split(a:issue.description,"\n")
     call append(line('$') , substitute(line , '' , '' , 'g'))
@@ -304,6 +310,17 @@ function! s:to_issue(xml)
         \ 'created_on'      : s:to_value(a:xml.childNode('created_on').child) ,
         \ 'updated_on'      : s:to_value(a:xml.childNode('updated_on').child) ,
         \}
+  " custom_fileds
+  let issue.custom_fileds = []
+  let custom_fields = a:xml.childNode("custom_fields")
+  if !empty(custom_fields)
+    for field in custom_fields.childNodes('custom_field')
+      call add(issue.custom_fileds , {
+            \ 'name'  : field.attr['name'] , 
+            \ 'value' : field.child[0]
+            \ })
+    endfor
+  endif
   " unite_word
   let issue.unite_word = '#' . issue.id . ' ' . issue.subject
   " url for CRUD
@@ -325,6 +342,18 @@ function! s:escape(str)
   let str = substitute(str, '<', '\&lt;' , 'g')
   let str = substitute(str, '"', '\&#34;', 'g')
   return str
+endfunction
+"
+" padding
+"
+function! s:padding_right(str, size)
+  let str = a:str
+  while 1
+    if strwidth(str) >= a:size
+      return str
+    endif
+    let str .= ' '
+  endwhile
 endfunction
 "
 " echo info log
