@@ -290,25 +290,21 @@ endfunction
 " xml to issue
 "
 function! s:to_issue(xml)
-  " i want this to be inner function
-  function! s:to_value(v)
-    return empty(a:v) ? '' : a:v[0]
-  endfunction
   let issue = {
-        \ 'id'              : s:to_value(a:xml.childNode('id').child) ,
-        \ 'project'         : a:xml.childNode('project').attr['name'] ,
-        \ 'tracker'         : a:xml.childNode('tracker').attr['name'] ,
-        \ 'status'          : a:xml.childNode('status').attr['name'] ,
-        \ 'priority'        : a:xml.childNode('priority').attr['name'] ,
-        \ 'author'          : a:xml.childNode('author').attr['name'] ,
-        \ 'subject'         : s:to_value(a:xml.childNode('subject').child) ,
-        \ 'description'     : s:to_value(a:xml.childNode('description').child) ,
-        \ 'start_date'      : s:to_value(a:xml.childNode('start_date').child) ,
-        \ 'due_date'        : s:to_value(a:xml.childNode('due_date').child) ,
-        \ 'estimated_hours' : s:to_value(a:xml.childNode('estimated_hours').child) ,
-        \ 'done_ratio'      : s:to_value(a:xml.childNode('done_ratio').child) ,
-        \ 'created_on'      : s:to_value(a:xml.childNode('created_on').child) ,
-        \ 'updated_on'      : s:to_value(a:xml.childNode('updated_on').child) ,
+        \ 'id'              : a:xml.find('id').value() ,
+        \ 'project'         : a:xml.find('project').attr['name'] ,
+        \ 'tracker'         : a:xml.find('tracker').attr['name'] ,
+        \ 'status'          : a:xml.find('status').attr['name'] ,
+        \ 'priority'        : a:xml.find('priority').attr['name'] ,
+        \ 'author'          : a:xml.find('author').attr['name'] ,
+        \ 'subject'         : a:xml.find('subject').value() ,
+        \ 'description'     : a:xml.find('description').value() ,
+        \ 'start_date'      : a:xml.find('start_date').value() ,
+        \ 'due_date'        : a:xml.find('due_date').value() ,
+        \ 'estimated_hours' : a:xml.find('estimated_hours').value() ,
+        \ 'done_ratio'      : a:xml.find('done_ratio').value() ,
+        \ 'created_on'      : a:xml.find('created_on').value() ,
+        \ 'updated_on'      : a:xml.find('updated_on').value() ,
         \}
   " custom_fileds
   let issue.custom_fileds = []
@@ -317,7 +313,7 @@ function! s:to_issue(xml)
     for field in custom_fields.childNodes('custom_field')
       call add(issue.custom_fileds , {
             \ 'name'  : field.attr['name'] , 
-            \ 'value' : field.child[0]
+            \ 'value' : field.value()
             \ })
     endfor
   endif
