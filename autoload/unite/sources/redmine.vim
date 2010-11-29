@@ -245,11 +245,7 @@ function! s:load_issue(issue, forcely)
     call append(line('$') , substitute(line , '' , '' , 'g'))
   endfor
   " clear undo
-  let old_undolevels = &undolevels
-  setlocal undolevels=-1
-  execute "normal a \<BS>\<Esc>"
-  let &l:undolevels = old_undolevels
-  unlet old_undolevels
+  call s:clear_undo()
   " check access key.
   if !exists('g:unite_yarm_access_key')
     setlocal buftype=nofile
@@ -360,6 +356,16 @@ function! s:escape(str)
   let str = substitute(str, '<', '\&lt;' , 'g')
   let str = substitute(str, '"', '\&#34;', 'g')
   return str
+endfunction
+"
+" clear undo
+"
+function! s:clear_undo()
+  let old_undolevels = &undolevels
+  setlocal undolevels=-1
+  execute "normal a \<BS>\<Esc>"
+  let &l:undolevels = old_undolevels
+  unlet old_undolevels
 endfunction
 "
 " padding
