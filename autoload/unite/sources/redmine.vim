@@ -76,7 +76,7 @@ let s:unite_source.action_table.common = s:action_table
 "
 let s:action_table.open = {'description' : 'open issue'}
 function! s:action_table.open.func(candidate)
-  call s:load_issue(a:candidate.source__issue)
+  call s:load_issue(a:candidate.source__issue , 0)
 endfunction
 "
 " action - browser
@@ -92,7 +92,7 @@ let s:action_table.reget = {'description' : 'reget issue'}
 function! s:action_table.reget.func(candidate)
   let id = a:candidate.source__issue.id
   call s:info('reget issue #' . id . ' ...')
-  call s:load_issue(s:reget_issue(id))
+  call s:load_issue(s:reget_issue(id) , 1)
 endfunction
 "
 " autocmd
@@ -153,7 +153,7 @@ function! s:redmine_put_issue()
     " :wq 保存して閉じる 
     " :w  チケットを取り直して再描画
     redraw
-    call s:load_issue(s:reget_issue(issue.id))
+    call s:load_issue(s:reget_issue(issue.id) , 1)
     call s:info('#' . issue.id . ' - ' . res.header[0])
   else
     redraw
@@ -198,9 +198,24 @@ endfunction
 "
 " load issue to buffer
 "
-function! s:load_issue(issue)
-  "exec 'new redmine_' . a:issue.id
-  exec 'edit! redmine_' . a:issue.id
+" issue   : 編集対象のチケット情報
+" forcely : 強制的に内容を書き換えるか
+"
+function! s:load_issue(issue, forcely)
+  let bufname = 'redmine_' . a:issue.id 
+  let bufno   = bufnr(bufname . "$")
+  " 強制上書きまたは隠れバッファ(ls!で表示されるもの)の場合
+  if a:forcely || !buflisted(bufname)
+    if bufno != -1
+      execute 'bwipeout! ' . bufno
+    endif
+  " 存在する場合は表示、存在しない場合は一度消してから開きなおし
+  else
+    execute 'buffer ' . bufno
+    return
+  endif
+
+  exec 'edit! ' . bufname
   silent %delete _
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -229,6 +244,12 @@ function! s:load_issue(issue)
   for line in split(a:issue.description,"\n")
     call append(line('$') , substitute(line , '' , '' , 'g'))
   endfor
+  " clear undo
+  let old_undolevels = &undolevels
+  setlocal undolevels=-1
+  execute "normal a \<BS>\<Esc>"
+  let &l:undolevels = old_undolevels
+  unlet old_undolevels
   " check access key.
   if !exists('g:unite_yarm_access_key')
     setlocal buftype=nofile
@@ -244,6 +265,7 @@ function! s:load_issue(issue)
       autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
     augroup END
   endif
+
   " move cursor to top
   :1
   stopinsert
