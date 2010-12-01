@@ -393,13 +393,7 @@ endfunction
 "
 function! s:parse_args(args)
   " default option うーむ
-  let option = {
-    \ '!'           : 0  ,
-    \ 'project_id'  : '' ,
-    \ 'status_id'   : '' ,
-    \ 'tracker_id'  : '' ,
-    \ 'assigned_to' : '' ,
-    \ }
+  let option = {}
   for arg in a:args
     let v = split(arg , '=')
     let option[v[0]] = len(v) == 1 ? 1 : v[1]
