@@ -8,6 +8,20 @@ yet another redmine source for unite.vim
     チケット一覧の表示(かつ、一覧をキャッシュ)
     キャッシュがあればそれを表示
 
+    パラメータ(パラメータを指定した場合はチケットを取り直す)
+      !
+        チケットを取り直す(条件未指定時は全ての open チケットを取得)
+      project_id
+        プロジェクトID (番号 or 識別子)
+      status_id
+        ステータスID (番号 or 識別子)
+      tracker_id
+        トラッカーID (番号 or 識別子)
+      assigned_to
+        アサインID (番号 or 識別子)
+
+    例) Unite redmine:project_id=hoge:status_id=open
+
   Unite redmine:!
     キャッシュを破棄してチケットを取り直す
 

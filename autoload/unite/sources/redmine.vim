@@ -48,8 +48,10 @@ let s:unite_source.default_action = {'common' : 'open'}
 let s:unite_source.action_table   = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
-  " clear cache if Unite redmine:!
-  if len(a:args) > 0 && a:args[0] == '!'
+  " parse args
+  let option = s:parse_args(a:args)
+  " clear cache. option に判定メソッドを持たせたい
+  if len(option) != 0
     let s:candidates_cache = []
   endif
   " return cache if exist
@@ -59,7 +61,7 @@ function! s:unite_source.gather_candidates(args, context)
   " cache issues
   call s:info('now caching issues ...')
   let s:candidates_cache = 
-        \ map(s:get_issues() , '{
+        \ map(s:get_issues(option) , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
@@ -166,12 +168,19 @@ endfunction
 "
 " get issues with api
 "
-function! s:get_issues()
+function! s:get_issues(option)
   let url = g:unite_yarm_server_url . '/issues.xml?' . 
                   \ 'per_page=' . g:unite_yarm_per_page
   if exists('g:unite_yarm_access_key')
     let url .= '&key=' . g:unite_yarm_access_key
   endif
+  for key in keys(a:option)
+    " うーむ
+    if a:option[key] == ''
+      continue
+    endif
+    let url .= '&' . key . '=' . a:option[key]
+  endfor
   let issues = []
   let res = http#get(url)
   " check status code
@@ -378,6 +387,24 @@ function! s:padding_right(str, size)
     endif
     let str .= ' '
   endwhile
+endfunction
+"
+" parse option
+"
+function! s:parse_args(args)
+  " default option うーむ
+  let option = {
+    \ '!'           : 0  ,
+    \ 'project_id'  : '' ,
+    \ 'status_id'   : '' ,
+    \ 'tracker_id'  : '' ,
+    \ 'assigned_to' : '' ,
+    \ }
+  for arg in a:args
+    let v = split(arg , '=')
+    let option[v[0]] = len(v) == 1 ? 1 : v[1]
+  endfor
+  return option
 endfunction
 "
 " echo info log
