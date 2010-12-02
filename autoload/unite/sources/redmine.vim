@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.1
-" Last Change: 02 Dec 2010
+" Last Modified: 02 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,13 +24,8 @@
 "
 " variables
 "
-if !exists('g:unite_yarm_server_url')
-  let g:unite_yarm_server_url = 'http://localhost:3000'
-endif
-"
-if !exists('g:unite_yarm_per_page')
-  let g:unite_yarm_per_page = 25
-endif
+call unite#util#set_default('g:unite_yarm_server_url', 'http://localhost:3000')
+call unite#util#set_default('g:unite_yarm_per_page'  , 25)
 " hi - source を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
 "
