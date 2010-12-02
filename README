@@ -19,8 +19,10 @@ yet another redmine source for unite.vim
         トラッカーID (番号 or 識別子)
       assigned_to
         アサインID (番号 or 識別子)
+      per_page
+        検索対象チケット数
 
-    例) Unite redmine:project_id=hoge:status_id=open
+    例) Unite redmine:project_id=hoge:status_id=open:per_page=100
 
   Unite redmine:!
     キャッシュを破棄してチケットを取り直す
