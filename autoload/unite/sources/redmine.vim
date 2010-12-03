@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.1
-" Last Modified: 02 Dec 2010
+" Last Modified: 04 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -176,14 +176,19 @@ function! s:get_issues(option)
     endif
     let url .= '&' . key . '=' . a:option[key]
   endfor
-  let issues = []
   let res = http#get(url)
+  " server is not active
+  if len(res.header) == 0
+    call s:error('can not access ' . g:unite_yarm_server_url)
+    return []
+  endif
   " check status code
   if split(res.header[0])[1] != '200'
     call s:error(res.header[0])
     return []
   endif
   " convert xml to dict
+  let issues = []
   for dom in xml#parse(res.content).childNodes('issue')
     call add(issues , s:to_issue(dom))
   endfor
