@@ -28,6 +28,11 @@ call unite#util#set_default('g:unite_yarm_server_url', 'http://localhost:3000')
 call unite#util#set_default('g:unite_yarm_per_page'  , 25)
 " hi - source を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
+" field の並び順
+let s:field_order = ['tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
+      \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on']
+" field 名のパディング値
+let s:padding_len = 15
 "
 " source
 "
@@ -170,7 +175,6 @@ function! s:get_issues(option)
     let url .= '&key=' . g:unite_yarm_access_key
   endif
   for key in keys(a:option)
-    " うーむ
     if a:option[key] == ''
       continue
     endif
@@ -232,23 +236,16 @@ function! s:load_issue(issue, forcely)
   setlocal fileformat=unix
   setfiletype redmine
   " append issue's fields
-  call append(0 , [
-      \ '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>' ,
-      \ '' ,
-      \ 'tracker         : ' . a:issue.tracker ,
-      \ 'status          : ' . a:issue.status ,
-      \ 'priority        : ' . a:issue.priority ,
-      \ 'author          : ' . a:issue.author ,
-      \ 'assigned_to     : ' . a:issue.assigned_to ,
-      \ 'start_date      : ' . a:issue.start_date ,
-      \ 'due_date        : ' . a:issue.due_date ,
-      \ 'estimated_hours : ' . a:issue.estimated_hours ,
-      \ 'done_ratio      : ' . a:issue.done_ratio ,
-      \ 'created_on      : ' . a:issue.created_on ,
-      \ 'updated_on      : ' . a:issue.updated_on ,
-      \ ])
+  let fields = []
+  call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
+  call add(fields , '')
+  for v in s:field_order
+    call add(fields , s:padding_right(v , s:padding_len) . ' : ' . (has_key(a:issue , v) ? a:issue[v] : ''))
+  endfor
+  " append fields
+  call append(0 , fields)
   for custom in a:issue.custom_fileds
-    call append(line('$') - 1 , s:padding_right(custom.name , 15) . ' : ' . custom.value)
+    call append(line('$') - 1 , s:padding_right(custom.name , s:padding_len) . ' : ' . custom.value)
   endfor
   " add description
   for line in split(a:issue.description,"\n")
@@ -318,23 +315,10 @@ endfunction
 " xml to issue
 "
 function! s:to_issue(xml)
-  let issue = {
-        \ 'id'              : s:find_value(a:xml , 'id') ,
-        \ 'project'         : s:find_attr(a:xml , 'project'     , 'name') ,
-        \ 'tracker'         : s:find_attr(a:xml , 'tracker'     , 'name') ,
-        \ 'status'          : s:find_attr(a:xml , 'status'      , 'name') ,
-        \ 'priority'        : s:find_attr(a:xml , 'priority'    , 'name') ,
-        \ 'author'          : s:find_attr(a:xml , 'author'      , 'name') ,
-        \ 'assigned_to'     : s:find_attr(a:xml , 'assigned_to' , 'name') ,
-        \ 'subject'         : s:find_value(a:xml , 'subject') ,
-        \ 'description'     : s:find_value(a:xml , 'description') ,
-        \ 'start_date'      : s:find_value(a:xml , 'start_date') ,
-        \ 'due_date'        : s:find_value(a:xml , 'due_date') ,
-        \ 'estimated_hours' : s:find_value(a:xml , 'estimated_hours') ,
-        \ 'done_ratio'      : s:find_value(a:xml , 'done_ratio') ,
-        \ 'created_on'      : s:find_value(a:xml , 'created_on') ,
-        \ 'updated_on'      : s:find_value(a:xml , 'updated_on') ,
-        \}
+  let issue = {}
+  for node in a:xml.childNodes()
+    let issue[node.name] = empty(node.attr) ? node.value() : node.attr.name
+  endfor
   " custom_fileds
   let issue.custom_fileds = []
   let custom_fields = a:xml.childNode("custom_fields")
@@ -356,26 +340,6 @@ function! s:to_issue(xml)
   let issue.rest_url = rest_url
 
   return issue
-endfunction
-"
-" find_value
-"
-function! s:find_value(xml, node_name)
-  let node = a:xml.find(a:node_name)
-  if empty(node)
-    return ''
-  endif
-  return node.value()
-endfunction
-"
-" find_attr
-"
-function! s:find_attr(xml, node_name, attr)
-  let node = a:xml.find(a:node_name)
-  if empty(node)
-    return ''
-  endif
-  return node.attr[a:attr]
 endfunction
 "
 " from xml.vim
@@ -414,7 +378,6 @@ endfunction
 " parse option
 "
 function! s:parse_args(args)
-  " default option うーむ
   let option = {}
   for arg in a:args
     let v = split(arg , '=')
