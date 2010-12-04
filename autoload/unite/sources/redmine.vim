@@ -141,20 +141,9 @@ function! s:redmine_put_issue()
   endif
   " backup
   call s:backup_issue(pre)
-  " 2行目移行の改行だけの行移行を description とみなす
-  :2
-  let body_start = search('^$' , 'W')
-  if body_start == 0
-    let body  = '<issue><description/></issue>' 
-  else
-    " 最後の改行が削られるので \n を付ける
-    let body  = '<issue><description>' 
-                \ . join(map(getline(body_start + 1 , '$') , "s:escape(v:val)") , "\n") . "\n"
-                \ . '</description></issue>'
-  endif
-
   " put issue
-  let res   = http#post(issue.rest_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
+  let res   = http#post(issue.rest_url , s:create_put_xml() , 
+                          \ {'Content-Type' : 'text/xml'} , 'PUT')
   " split HTTP/1.0 200 OK
   if split(res.header[0])[1] == '200'
     " :wq 保存して閉じる 
@@ -249,6 +238,7 @@ function! s:load_issue(issue, forcely)
   endfor
   " append fields
   call append(0 , fields)
+  " append custom fields
   for custom in a:issue.custom_fileds
     call append(line('$') - 1 , s:padding_right(custom.name , s:padding_len) . ' : ' . custom.value)
   endfor
@@ -277,6 +267,22 @@ function! s:load_issue(issue, forcely)
   " move cursor to top
   :1
   stopinsert
+endfunction
+"
+" create_pu_xml
+" 2行目以降にある改行だけの行以降を description とみなす
+"
+function! s:create_put_xml()
+  :2
+  let body_start = search('^$' , 'W')
+  if body_start == 0
+    return '<issue><description/></issue>' 
+  else
+    " 最後の改行が削られるので \n を付ける
+    return '<issue><description>' 
+            \ . join(map(getline(body_start + 1 , '$') , "s:escape(v:val)") , "\n") . "\n"
+            \ . '</description></issue>'
+  endif
 endfunction
 "
 " open browser with issue's id
