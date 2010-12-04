@@ -239,6 +239,7 @@ function! s:load_issue(issue, forcely)
       \ 'status          : ' . a:issue.status ,
       \ 'priority        : ' . a:issue.priority ,
       \ 'author          : ' . a:issue.author ,
+      \ 'assigned_to     : ' . a:issue.assigned_to ,
       \ 'start_date      : ' . a:issue.start_date ,
       \ 'due_date        : ' . a:issue.due_date ,
       \ 'estimated_hours : ' . a:issue.estimated_hours ,
@@ -318,20 +319,21 @@ endfunction
 "
 function! s:to_issue(xml)
   let issue = {
-        \ 'id'              : a:xml.find('id').value() ,
-        \ 'project'         : a:xml.find('project').attr['name'] ,
-        \ 'tracker'         : a:xml.find('tracker').attr['name'] ,
-        \ 'status'          : a:xml.find('status').attr['name'] ,
-        \ 'priority'        : a:xml.find('priority').attr['name'] ,
-        \ 'author'          : a:xml.find('author').attr['name'] ,
-        \ 'subject'         : a:xml.find('subject').value() ,
-        \ 'description'     : a:xml.find('description').value() ,
-        \ 'start_date'      : a:xml.find('start_date').value() ,
-        \ 'due_date'        : a:xml.find('due_date').value() ,
-        \ 'estimated_hours' : a:xml.find('estimated_hours').value() ,
-        \ 'done_ratio'      : a:xml.find('done_ratio').value() ,
-        \ 'created_on'      : a:xml.find('created_on').value() ,
-        \ 'updated_on'      : a:xml.find('updated_on').value() ,
+        \ 'id'              : s:find_value(a:xml , 'id') ,
+        \ 'project'         : s:find_attr(a:xml , 'project'     , 'name') ,
+        \ 'tracker'         : s:find_attr(a:xml , 'tracker'     , 'name') ,
+        \ 'status'          : s:find_attr(a:xml , 'status'      , 'name') ,
+        \ 'priority'        : s:find_attr(a:xml , 'priority'    , 'name') ,
+        \ 'author'          : s:find_attr(a:xml , 'author'      , 'name') ,
+        \ 'assigned_to'     : s:find_attr(a:xml , 'assigned_to' , 'name') ,
+        \ 'subject'         : s:find_value(a:xml , 'subject') ,
+        \ 'description'     : s:find_value(a:xml , 'description') ,
+        \ 'start_date'      : s:find_value(a:xml , 'start_date') ,
+        \ 'due_date'        : s:find_value(a:xml , 'due_date') ,
+        \ 'estimated_hours' : s:find_value(a:xml , 'estimated_hours') ,
+        \ 'done_ratio'      : s:find_value(a:xml , 'done_ratio') ,
+        \ 'created_on'      : s:find_value(a:xml , 'created_on') ,
+        \ 'updated_on'      : s:find_value(a:xml , 'updated_on') ,
         \}
   " custom_fileds
   let issue.custom_fileds = []
@@ -354,6 +356,26 @@ function! s:to_issue(xml)
   let issue.rest_url = rest_url
 
   return issue
+endfunction
+"
+" find_value
+"
+function! s:find_value(xml, node_name)
+  let node = a:xml.find(a:node_name)
+  if empty(node)
+    return ''
+  endif
+  return node.value()
+endfunction
+"
+" find_attr
+"
+function! s:find_attr(xml, node_name, attr)
+  let node = a:xml.find(a:node_name)
+  if empty(node)
+    return ''
+  endif
+  return node.attr[a:attr]
 endfunction
 "
 " from xml.vim
