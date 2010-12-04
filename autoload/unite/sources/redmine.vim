@@ -24,13 +24,13 @@
 "
 " variables
 "
-call unite#util#set_default('g:unite_yarm_server_url', 'http://localhost:3000')
-call unite#util#set_default('g:unite_yarm_per_page'  , 25)
+call unite#util#set_default('g:unite_yarm_server_url'  , 'http://localhost:3000')
+call unite#util#set_default('g:unite_yarm_per_page'    , 25)
+call unite#util#set_default('g:unite_yarm_filed_order' , [
+      \ 'tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
+      \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on'])
 " hi - source を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
-" field の並び順
-let s:field_order = ['tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
-      \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on']
 " field 名のパディング値
 let s:padding_len = 15
 "
@@ -239,7 +239,7 @@ function! s:load_issue(issue, forcely)
   let fields = []
   call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
   call add(fields , '')
-  for v in s:field_order
+  for v in g:unite_yarm_filed_order
     call add(fields , s:padding_right(v , s:padding_len) . ' : ' . (has_key(a:issue , v) ? a:issue[v] : ''))
   endfor
   " append fields
