@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.1
-" Last Modified: 04 Dec 2010
+" Last Modified: 05 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,6 +21,9 @@
 "     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 "     THE SOFTWARE.
 " }}}
+"
+"
+"echo matchstr('tracker         : Feature' , '^tracker .* : \zs.*\ze')
 "
 " variables
 "
