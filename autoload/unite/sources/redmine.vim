@@ -143,11 +143,16 @@ function! s:redmine_put_issue()
   call s:backup_issue(pre)
   " 2行目移行の改行だけの行移行を description とみなす
   :2
-  let body_start = search('^$') + 1
-  " 最後の改行が削られるので \n を付ける
-  let body  = '<issue><description>' 
-                \ . join(map(getline(body_start,'$') , "s:escape(v:val)") , "\n") . "\n"
+  let body_start = search('^$' , 'W')
+  if body_start == 0
+    let body  = '<issue><description/></issue>' 
+  else
+    " 最後の改行が削られるので \n を付ける
+    let body  = '<issue><description>' 
+                \ . join(map(getline(body_start + 1 , '$') , "s:escape(v:val)") , "\n") . "\n"
                 \ . '</description></issue>'
+  endif
+
   " put issue
   let res   = http#post(issue.rest_url , body , {'Content-Type' : 'text/xml'} , 'PUT')
   " split HTTP/1.0 200 OK
