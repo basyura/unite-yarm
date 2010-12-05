@@ -49,7 +49,7 @@ let s:unite_source.action_table   = {}
 " create list
 function! s:unite_source.gather_candidates(args, context)
   " parse args
-  let option = s:parse_args(a:args)
+  let option = unite#yarm#parse_args(a:args)
   " clear cache. option に判定メソッドを持たせたい
   if len(option) != 0
     let s:candidates_cache = []
@@ -59,9 +59,9 @@ function! s:unite_source.gather_candidates(args, context)
     return s:candidates_cache
   endif
   " cache issues
-  call s:info('now caching issues ...')
+  call unite#yarm#info('now caching issues ...')
   let s:candidates_cache = 
-        \ map(s:get_issues(option) , '{
+        \ map(unite#yarm#get_issues(option) , '{
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
@@ -85,7 +85,7 @@ endfunction
 "
 let s:action_table.browser = {'description' : 'open issue with browser'}
 function! s:action_table.browser.func(candidate)
-  call s:open_browser(a:candidate.source__issue.id)
+  call unite#yarm#open_browser(a:candidate.source__issue.id)
 endfunction
 "
 " action - reget
@@ -93,7 +93,7 @@ endfunction
 let s:action_table.reget = {'description' : 'reget issue'}
 function! s:action_table.reget.func(candidate)
   let id = a:candidate.source__issue.id
-  call s:info('reget issue #' . id . ' ...')
+  call unite#yarm#info('reget issue #' . id . ' ...')
   call s:load_issue(s:reget_issue(id) , 1)
 endfunction
 "
@@ -103,11 +103,15 @@ augroup RedmineGroup
   autocmd! RedmineGroup
   autocmd FileType redmine call s:redmine_issue_settings()
 augroup END  
-
+"
+"
+"
 function! s:redmine_issue_settings()
   nmap <silent> <buffer> <CR> :call <SID>redmine_issue_buffer_action()<CR>
 endfunction
-
+"
+"
+"
 function! s:redmine_issue_buffer_action()
   let matched = matchlist(expand('<cWORD>') , 'https\?://\S\+')
   if len(matched) != 0
@@ -117,30 +121,32 @@ function! s:redmine_issue_buffer_action()
   let hiid = synIDattr(synID(line('.'),col('.'),1),'name')
   " open issue
   if hiid == 'yarm_title'
-    call s:open_browser(b:unite_yarm_issue.id)
+    call unite#yarm#open_browser(b:unite_yarm_issue.id)
     return
   endif
 endfunction
-
+"
+"
+"
 function! s:redmine_put_issue()
   echohl yarm_ok
   if input('update ? (y/n) : ') != 'y'
-    return s:info('update was canceled')
+    return unite#yarm#info('update was canceled')
   endif
   echohl None
   " cached issue
   let issue = b:unite_yarm_issue
   " i want display progress
-  call s:info('now updating #' . issue.id . ' ...')
+  call unite#yarm#info('now updating #' . issue.id . ' ...')
   " reget lastest issue
-  let pre   = s:get_issue(issue.id)
+  let pre   = unite#yarm#get_issue(issue.id)
   " check latest
   if pre.updated_on != issue.updated_on
     redraw
-    return s:error('issue #' . issue.id . ' is already updated')
+    return unite#yarm#error('issue #' . issue.id . ' is already updated')
   endif
   " backup
-  call s:backup_issue(pre)
+  call unite#yarm#backup_issue(pre)
   " put issue
   let res   = http#post(issue.rest_url , s:create_put_xml() , 
                           \ {'Content-Type' : 'text/xml'} , 'PUT')
@@ -150,58 +156,13 @@ function! s:redmine_put_issue()
     " :w  チケットを取り直して再描画
     redraw
     call s:load_issue(s:reget_issue(issue.id) , 1)
-    call s:info('#' . issue.id . ' - ' . res.header[0])
+    call unite#yarm#info('#' . issue.id . ' - ' . res.header[0])
   else
     redraw
-    call s:error('failed - ' . res.header[0])
+    call unite#yarm#error('failed - ' . res.header[0])
   endif
 endfunction
-
 " - private functions -
-
-"
-" get issues with api
-"
-function! s:get_issues(option)
-  let url = g:unite_yarm_server_url . '/issues.xml?' . 
-                  \ 'per_page=' . g:unite_yarm_per_page
-  if exists('g:unite_yarm_access_key')
-    let url .= '&key=' . g:unite_yarm_access_key
-  endif
-  for key in keys(a:option)
-    if a:option[key] == ''
-      continue
-    endif
-    let url .= '&' . key . '=' . a:option[key]
-  endfor
-  let res = http#get(url)
-  " server is not active
-  if len(res.header) == 0
-    call s:error('can not access ' . g:unite_yarm_server_url)
-    return []
-  endif
-  " check status code
-  if split(res.header[0])[1] != '200'
-    call s:error(res.header[0])
-    return []
-  endif
-  " convert xml to dict
-  let issues = []
-  for dom in xml#parse(res.content).childNodes('issue')
-    call add(issues , s:to_issue(dom))
-  endfor
-  return issues
-endfunction
-"
-" get issue with api
-"
-function! s:get_issue(id)
-  let url = g:unite_yarm_server_url . '/issues/' . a:id . '.xml'
-  if exists('g:unite_yarm_access_key')
-    let url .= '?key=' . g:unite_yarm_access_key
-  endif
-  return s:to_issue(xml#parseURL(url))
-endfunction
 "
 " load issue to buffer
 "
@@ -234,20 +195,20 @@ function! s:load_issue(issue, forcely)
   call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
   call add(fields , '')
   for v in g:unite_yarm_filed_order
-    call add(fields , s:padding_right(v , g:unite_yarm_field_padding_len) . ' : ' . (has_key(a:issue , v) ? a:issue[v] : ''))
+    call add(fields , unite#yarm#padding_right(v , g:unite_yarm_field_padding_len) . ' : ' . (has_key(a:issue , v) ? a:issue[v] : ''))
   endfor
   " append fields
   call append(0 , fields)
   " append custom fields
   for custom in a:issue.custom_fileds
-    call append(line('$') - 1 , s:padding_right(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
+    call append(line('$') - 1 , untie#yarm#padding_right(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
   endfor
   " add description
   for line in split(a:issue.description,"\n")
     call append(line('$') , substitute(line , '' , '' , 'g'))
   endfor
   " clear undo
-  call s:clear_undo()
+  call unite#yarm#clear_undo()
   " check access key.
   if !exists('g:unite_yarm_access_key')
     setlocal buftype=nofile
@@ -280,7 +241,7 @@ function! s:create_put_xml()
   let body_start = search('^$' , 'W')
   if body_start != 0
     " 最後の改行が削られるので \n を付ける
-    call desc.value(join(map(getline(body_start + 1 , '$') , "s:escape(v:val)") , "\n") . "\n")
+    call desc.value(join(map(getline(body_start + 1 , '$') , "unite#yarm#escape(v:val)") , "\n") . "\n")
   endif
   call s:add_updated_node(issue , 'start_date')
   call s:add_updated_node(issue , 'due_date')
@@ -313,18 +274,10 @@ function! s:get_field(name)
   return matchstr(getline(start) , '^' . a:name . ' .* : \zs.*\ze')
 endfunction
 "
-" open browser with issue's id
-"
-function! s:open_browser(id)
-  echohl yarm_ok 
-  execute "OpenBrowser " . g:unite_yarm_server_url . '/issues/' . a:id
-  echohl None
-endfunction
-"
 " reget issue
 "
 function! s:reget_issue(id)
-  let issue = s:get_issue(a:id)
+  let issue = unite#yarm#get_issue(a:id)
   for cache in s:candidates_cache
     " update cache
     if cache.source__issue.id == a:id
@@ -334,108 +287,4 @@ function! s:reget_issue(id)
     endif
   endfor
   return issue
-endfunction
-"
-" backup issue
-"
-functio! s:backup_issue(issue)
-  if !exists('g:unite_yarm_backup_dir')
-    return
-  endif
-
-  let body = split(a:issue.description , "\n")
-  let path = g:unite_yarm_backup_dir . '/' . a:issue.id
-        \ . '.' . strftime('%Y%m%d%H%M%S')
-        \ . '.txt'
-  call writefile(body , path)
-
-endfunction
-"
-" xml to issue
-"
-function! s:to_issue(xml)
-  let issue = {}
-  for node in a:xml.childNodes()
-    let issue[node.name] = empty(node.attr) ? node.value() : 
-          \ has_key(node.attr , 'name') ? node.attr.name : ''
-  endfor
-  " custom_fileds
-  let issue.custom_fileds = []
-  let custom_fields = a:xml.childNode("custom_fields")
-  if !empty(custom_fields)
-    for field in custom_fields.childNodes('custom_field')
-      call add(issue.custom_fileds , {
-            \ 'name'  : field.attr['name'] , 
-            \ 'value' : field.value()
-            \ })
-    endfor
-  endif
-  " unite_word
-  let issue.unite_word = '#' . issue.id . ' ' . issue.subject
-  " url for CRUD
-  let rest_url = g:unite_yarm_server_url . '/issues/' . issue.id . '.xml?format=xml'
-  if exists('g:unite_yarm_access_key')
-    let rest_url .= '&key=' . g:unite_yarm_access_key
-  endif
-  let issue.rest_url = rest_url
-
-  return issue
-endfunction
-"
-" from xml.vim
-"
-function! s:escape(str)
-  let str = a:str
-  let str = substitute(str, '&', '\&amp;', 'g')
-  let str = substitute(str, '>', '\&gt;' , 'g')
-  let str = substitute(str, '<', '\&lt;' , 'g')
-  let str = substitute(str, '"', '\&#34;', 'g')
-  return str
-endfunction
-"
-" clear undo
-"
-function! s:clear_undo()
-  let old_undolevels = &undolevels
-  setlocal undolevels=-1
-  execute "normal a \<BS>\<Esc>"
-  let &l:undolevels = old_undolevels
-  unlet old_undolevels
-endfunction
-"
-" padding
-"
-function! s:padding_right(str, size)
-  let str = a:str
-  while 1
-    if strwidth(str) >= a:size
-      return str
-    endif
-    let str .= ' '
-  endwhile
-endfunction
-"
-" parse option
-"
-function! s:parse_args(args)
-  let option = {}
-  for arg in a:args
-    let v = split(arg , '=')
-    let option[v[0]] = len(v) == 1 ? 1 : v[1]
-  endfor
-  return option
-endfunction
-"
-" echo info log
-"
-function! s:info(msg)
-  echohl yarm_ok | echo a:msg | echohl None
-  return 1
-endfunction
-"
-" echo error log
-"
-function! s:error(msg)
-  echohl ErrorMsg | echo a:msg | echohl None
-  return 0
 endfunction
