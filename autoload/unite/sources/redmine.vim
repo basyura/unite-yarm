@@ -23,8 +23,6 @@
 " }}}
 "
 "
-"echo matchstr('tracker         : Feature' , '^tracker .* : \zs.*\ze')
-"
 " variables
 "
 call unite#util#set_default('g:unite_yarm_server_url'  , 'http://localhost:3000')
@@ -276,16 +274,44 @@ endfunction
 " 2行目以降にある改行だけの行以降を description とみなす
 "
 function! s:create_put_xml()
+  let issue = xml#createElement('issue')
+  let desc  = xml#createElement('description')
+  call add(issue.child , desc)
   :2
   let body_start = search('^$' , 'W')
-  if body_start == 0
-    return '<issue><description/></issue>' 
-  else
+  if body_start != 0
     " 最後の改行が削られるので \n を付ける
-    return '<issue><description>' 
-            \ . join(map(getline(body_start + 1 , '$') , "s:escape(v:val)") , "\n") . "\n"
-            \ . '</description></issue>'
+    call desc.value(join(map(getline(body_start + 1 , '$') , "s:escape(v:val)") , "\n") . "\n")
   endif
+  call s:add_updated_node(issue , 'start_date')
+  call s:add_updated_node(issue , 'due_date')
+  call s:add_updated_node(issue , 'done_ratio')
+  "call s:add_updated_node(issue , 'estimated_hours')
+  "call s:add_updated_node(issue , 'spent_hours')
+
+  return issue.toString()
+endfunction
+"
+"
+"
+function! s:add_updated_node(issue, field_name)
+  :2
+  let value = s:get_field(a:field_name)
+  if value != b:unite_yarm_issue[a:field_name]
+    let node = xml#createElement(a:field_name)
+    call node.value(value)
+    call add(a:issue.child , node)
+  endif
+endfunction
+"
+"
+"
+function! s:get_field(name)
+  let start = search('^' . a:name . ' .* : .*' , 'W')
+  if start == 0
+    return 0
+  endif
+  return matchstr(getline(start) , '^' . a:name . ' .* : \zs.*\ze')
 endfunction
 "
 " open browser with issue's id
@@ -331,7 +357,8 @@ endfunction
 function! s:to_issue(xml)
   let issue = {}
   for node in a:xml.childNodes()
-    let issue[node.name] = empty(node.attr) ? node.value() : node.attr.name
+    let issue[node.name] = empty(node.attr) ? node.value() : 
+          \ has_key(node.attr , 'name') ? node.attr.name : ''
   endfor
   " custom_fileds
   let issue.custom_fileds = []
