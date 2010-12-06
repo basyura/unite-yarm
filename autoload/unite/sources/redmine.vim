@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.1
-" Last Modified: 05 Dec 2010
+" Last Modified: 06 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +31,7 @@ call unite#util#set_default('g:unite_yarm_filed_order' , [
       \ 'tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
       \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on'])
 call unite#util#set_default('g:unite_yarm_field_padding_len' , 15)
-" hi - source を読み込み直すと消えちゃう
+" hi - vimrc を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
 "
 " source
