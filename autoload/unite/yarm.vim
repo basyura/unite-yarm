@@ -1,6 +1,6 @@
 "
 " Version:     0.1.1
-" Last Modified: 05 Dec 2010
+" Last Modified: 09 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,9 +36,16 @@ endfunction
 " parse option
 "
 function! unite#yarm#parse_args(args)
+  let convert_def = {
+        \ 'status'   : 'status_id'   ,
+        \ 'project'  : 'project_id'  ,
+        \ 'tracker'  : 'tracker_id'  ,
+        \ 'assigned' : 'assigned_to'
+        \ }
   let option = {}
   for arg in a:args
     let v = split(arg , '=')
+    let v[0] = has_key(convert_def , v[0]) ? convert_def[v[0]] : v[0]
     let option[v[0]] = len(v) == 1 ? 1 : v[1]
   endfor
   return option

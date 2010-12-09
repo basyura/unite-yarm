@@ -11,18 +11,19 @@ yet another redmine source for unite.vim
     パラメータ(パラメータを指定した場合はチケットを取り直す)
       !
         チケットを取り直す(条件未指定時は全ての open チケットを取得)
-      project_id
+      project_id (or project)
         プロジェクトID (番号 or 識別子)
-      status_id
+      status_id (or status)
         ステータスID (番号 or 識別子)
-      tracker_id
+      tracker_id (or tracker)
         トラッカーID (番号 or 識別子)
-      assigned_to
+      assigned_to (or assigned)
         アサインID (番号 or 識別子)
       per_page
         検索対象チケット数
 
-    例) Unite redmine:project_id=hoge:status_id=open:per_page=100
+    例1) Unite redmine:project_id=hoge:status_id=open:per_page=100
+    例2) Unite redmine:project=hoge:status=open:per_page=100
 
   Unite redmine:!
     キャッシュを破棄してチケットを取り直す
