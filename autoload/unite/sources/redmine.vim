@@ -1,6 +1,6 @@
 " redmine source for unite.vim
-" Version:     0.1.1
-" Last Modified: 06 Dec 2010
+" Version:     0.1.2
+" Last Modified: 10 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +33,8 @@ call unite#util#set_default('g:unite_yarm_filed_order' , [
 call unite#util#set_default('g:unite_yarm_field_padding_len' , 15)
 " hi - vimrc を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
+" フィールドと見なす行数
+let s:field_row = 3
 "
 " source
 "
@@ -104,13 +106,13 @@ augroup RedmineGroup
   autocmd FileType redmine call s:redmine_issue_settings()
 augroup END  
 "
-"
+" redmine_issue_settings
 "
 function! s:redmine_issue_settings()
   nmap <silent> <buffer> <CR> :call <SID>redmine_issue_buffer_action()<CR>
 endfunction
 "
-"
+" redmine_issue_buffer_action
 "
 function! s:redmine_issue_buffer_action()
   let matched = matchlist(expand('<cWORD>') , 'https\?://\S\+')
@@ -118,15 +120,25 @@ function! s:redmine_issue_buffer_action()
     echohl yarm_ok | execute "OpenBrowser " . matched[0] | echohl None
     return
   endif
+  " get syntax id
   let hiid = synIDattr(synID(line('.'),col('.'),1),'name')
   " open issue
-  if hiid == 'yarm_title'
+  if hiid =~ 'yarm_title\|yarm_tool_open'
     call unite#yarm#open_browser(b:unite_yarm_issue.id)
-    return
+  " reload issue
+  elseif hiid == 'yarm_tool_reload'
+    echohl yarm_ok |let ret = input('reget ? (y/n) : ') |echohl None
+    echo ''
+    if ret == 'y'
+      call s:load_issue(s:reget_issue(b:unite_yarm_issue.id) , 1)
+    endif
+  " update issue
+  elseif hiid == 'yarm_tool_write'
+    execute 'w'
   endif
 endfunction
 "
-"
+" redmine_put_issue
 "
 function! s:redmine_put_issue()
   echohl yarm_ok
@@ -173,11 +185,12 @@ function! s:load_issue(issue, forcely)
   let bufname = 'redmine_' . a:issue.id 
   let bufno   = bufnr(bufname . "$")
   " 強制上書きまたは隠れバッファ(ls!で表示されるもの)の場合
+  " 一度消してから開きなおし
   if a:forcely || !buflisted(bufname)
-    if bufno != -1
-      execute 'bwipeout! ' . bufno
-    endif
-  " 存在する場合は表示、存在しない場合は一度消してから開きなおし
+    "if bufno != -1
+      "execute 'bwipeout! ' . bufno
+    "endif
+  " 存在する場合は表示
   else
     execute 'buffer ' . bufno
     return
@@ -194,14 +207,17 @@ function! s:load_issue(issue, forcely)
   let fields = []
   call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
   call add(fields , '')
+  call add(fields , unite#yarm#rjust('[R][O][W]' , strwidth(fields[0])))
   for v in g:unite_yarm_filed_order
-    call add(fields , unite#yarm#padding_right(v , g:unite_yarm_field_padding_len) . ' : ' . (has_key(a:issue , v) ? a:issue[v] : ''))
+    call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
+                        \ . (has_key(a:issue , v) ? a:issue[v] : ''))
   endfor
   " append fields
   call append(0 , fields)
   " append custom fields
   for custom in a:issue.custom_fileds
-    call append(line('$') - 1 , untie#yarm#padding_right(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
+    call append(line('$') - 1 , 
+          \ untie#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
   endfor
   " add description
   for line in split(a:issue.description,"\n")
@@ -237,7 +253,7 @@ function! s:create_put_xml()
   let issue = xml#createElement('issue')
   let desc  = xml#createElement('description')
   call add(issue.child , desc)
-  :2
+  execute ":" . s:field_row
   let body_start = search('^$' , 'W')
   if body_start != 0
     " 最後の改行が削られるので \n を付ける
@@ -255,7 +271,7 @@ endfunction
 "
 "
 function! s:add_updated_node(issue, field_name)
-  :2
+  execute ":" . s:field_row
   let value = s:get_field(a:field_name)
   if value != b:unite_yarm_issue[a:field_name]
     let node = xml#createElement(a:field_name)

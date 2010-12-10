@@ -1,6 +1,6 @@
 "
-" Version:     0.1.1
-" Last Modified: 09 Dec 2010
+" yarm.vim
+" Last Modified: 10 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -62,9 +62,9 @@ function! unite#yarm#escape(str)
   return str
 endfunction
 "
-" padding
+" padding  ljust
 "
-function! unite#yarm#padding_right(str, size)
+function! unite#yarm#ljust(str, size)
   let str = a:str
   while 1
     if strwidth(str) >= a:size
@@ -72,6 +72,20 @@ function! unite#yarm#padding_right(str, size)
     endif
     let str .= ' '
   endwhile
+  return str
+endfunction
+"
+" padding rjust
+"
+function! unite#yarm#rjust(str, size)
+  let str = a:str
+  while 1
+    if strwidth(str) >= a:size
+      return str
+    endif
+    let str = ' ' . str
+  endwhile
+  return str
 endfunction
 "
 " echo info log
@@ -124,7 +138,7 @@ function! unite#yarm#to_issue(xml)
   if !empty(custom_fields)
     for field in custom_fields.childNodes('custom_field')
       call add(issue.custom_fileds , {
-            \ 'name'  : field.attr['name'] , 
+            \ 'name'  : field.attr.name , 
             \ 'value' : field.value()
             \ })
     endfor

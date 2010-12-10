@@ -1,10 +1,14 @@
 
-" 効果が分からん
 if exists('b:current_syntax')
   finish
 endif
 
 syntax match yarm_title "^<< .* >>$"
+
+syntax match yarm_tool_reload '\[R\]'
+syntax match yarm_tool_open   '\[O\]'
+syntax match yarm_tool_write  '\[W\]'
+
 syntax match yarm_link  "\<http://\S\+"  
 syntax match yarm_link  "\<https://\S\+"
 
@@ -26,12 +30,15 @@ syntax match yarm_h3 "^h3\..*"
 
 syntax region yarm_pre start="<pre>"  end="</pre>" 
 
-highlight default link yarm_title Statement
-highlight default link yarm_link  Underlined
-highlight default link yarm_field Constant
-highlight default link yarm_h2    Underlined
-highlight default link yarm_h3    Statement
-highlight default link yarm_pre   Type
+highlight default link yarm_title       Statement
+highlight default link yarm_tool_reload String
+highlight default link yarm_tool_open   String
+highlight default link yarm_tool_write  String
+highlight default link yarm_link        Underlined
+highlight default link yarm_field       Constant
+highlight default link yarm_h2          Underlined
+highlight default link yarm_h3          Statement
+highlight default link yarm_pre         Type
 
 highlight yarm_ok guifg=white guibg=blue
 
