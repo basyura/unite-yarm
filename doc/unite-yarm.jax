@@ -1,0 +1,188 @@
+*unite-yarm*	redmine クライアント(unite.vim プラグイン)
+
+Version: 0.1.2
+Author : basyura <basyura@gmail.com>
+License: MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+目次							*unite-yarm-contents*
+
+概要			|unite-yarm-introduction|
+インストール		|unite-yarm-install|
+使い方			|unite-yarm-usage|
+パラメータ		|unite-yarm-parameter|
+アクション		|unite-yarm-action|
+変数			|unite-yarm-variables|
+
+==============================================================================
+概要							*unite-yarm-introduction*
+
+*unite-yarm* は unite.vim のプラグインとして動作するredmine クライアントであり、
+以下の操作が可能である。
+
+・チケットを一覧表示する
+・条件指定によるチケットの一覧表示をする
+・チケットの内容を表示する
+・チケット内容を更新する
+	description , start_date , due_date , done_ratio 
+・該当チケットをブラウザで表示する
+・description 内の url をブラウザで表示する
+・更新前チケットをバックアップする
+
+開発版リポジトリ
+	https://github.com/basyura/unite-yarm
+
+redmine
+	http://www.redmine.org/
+
+==============================================================================
+インストール						*unite-yarm-install*
+
+配布ファイルをVimスクリプトのディレクトリへインストールする。
+(普通は ~/.vim/ またはWindowsの場合、 $HOME/vimfiles)
+
+同様に、依存しているプラグインをインストールする。
+
+	unite.vim
+	https://github.com/Shougo/unite.vim
+
+	webapi-vim 
+	https://github.com/mattn/webapi-vim
+
+	open-browser.vim
+	https://github.com/tyru/open-browser.vim
+
+インストールに成功すると、:Unite redmine で実行できる。
+アクセスするサーバの指定は |unite-yarm-variables| を参照
+
+==============================================================================
+使い方							*unite-yarm-usage*
+
+:Unite redmine
+	
+	チケット一覧の表示
+	一覧からチケットを選択すると内容を表示する
+
+チケットの構成は以下となる。
+	
+	タイトル
+	ツール
+	フィールド
+	内容
+	
+更新可能なフィールドは、開始日(start_date)、終了日(due_date)、達成率(done_ratio)
+であり、セミコロンより右側を編集することで更新対象と判断する。
+
+	start_date      : 2010-12-10
+	due_date        : 2010-12-25
+	done_ratio      : 70
+	↓
+	start_date      : 2010-12-12
+	due_date        : 2010-12-27
+	done_ratio      : 40
+
+フィールド領域と内容領域は改行のみの行で区切られる。
+
+バッファ保存時(:w)に内容と変更されたフィールドをサーバへ通知する。
+
+チケットが他者によって既に更新されているかを updated_on フィールドで判断する。
+更新リクエスト前に最新のチケットを取得して比較し、同一でない場合は更新不可と
+する。このチェックは更新タイミングによっては発動しない。
+
+チケットでは Enter 押下時に各アクションを発動することができる
+
+	タイトルでの Enter
+	チケットをブラウザで表示する
+
+	ツール [R] での Enter
+	チケットの内容を取り直す
+
+	ツール [O] での Enter
+	チケットをブラウザで表示する
+
+	ツール [W] での Enter
+	チケットを保存する
+
+	URL でのエンター
+	URL をブラウザで開く
+	
+
+==============================================================================
+パラメータ						*unite-yarm-parameter*
+
+	パラメータを指定した場合はチケットを取り直す
+
+      	!
+	キャッシュを破棄してチケットを取り直す
+	(条件未指定時は全ての open チケットを取得する)
+
+	project_id (or project)
+	プロジェクトID (番号 or 識別子)
+	
+	status_id (or status)
+	ステータスID (番号 or 識別子)
+      
+	tracker_id (or tracker)
+	トラッカーID (番号 or 識別子)
+      
+	assigned_to (or assigned)
+	アサインID (番号 or 識別子)
+
+	per_page
+	検索対象チケット数
+
+	例1) Unite redmine:project_id=hoge:status_id=open:per_page=100
+	例2) Unite redmine:project=hoge:status=open:per_page=100
+	例3) Unite redmine:!
+
+==============================================================================
+アクション						*unite-yarm-action*
+
+	open
+	vim でチケットを開く
+
+	browser
+	ラウザでチケットを開く
+
+	reget
+	チケットを取り直す
+
+==============================================================================
+変数							*unite-yarm-variables*
+
+g:unite_yarm_server_url					*g:unite_yarm_server_url*
+	サーバの url
+	初期値：'http://localhost:3000'
+    
+g:unite_yarm_access_key					*g:unite_yarm_access_key*
+	認証に使用する API Access Key
+	定義されていない場合は更新不可
+	更新できるのは redmine の head or stable branch を使用している場合だけ
+
+g:unite_yarm_per_page					*g:unite_yarm_per_page*
+	取得するチケットの数(25 or 50 or 100 しか効かないと思う)
+  
+g:unite_yarm_backup_dir					*g:unite_yarm_backup_dir*
+	バックアップ先ディレクトリ
+	定義されていない場合はバックアップしない
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:fdl=0:
