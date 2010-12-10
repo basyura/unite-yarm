@@ -1,6 +1,6 @@
 " redmine source for unite.vim
-" Version:     0.1.3
-" Last Modified: 10 Dec 2010
+" Version:     0.1.4
+" Last Modified: 11 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -217,7 +217,7 @@ function! s:load_issue(issue, forcely)
   " append custom fields
   for custom in a:issue.custom_fileds
     call append(line('$') - 1 , 
-          \ untie#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
+          \ unite#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
   endfor
   " add description
   for line in split(a:issue.description,"\n")
