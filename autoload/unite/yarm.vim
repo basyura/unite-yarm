@@ -132,12 +132,12 @@ function! unite#yarm#to_issue(xml)
     let issue[node.name] = empty(node.attr) ? node.value() : 
           \ has_key(node.attr , 'name') ? node.attr.name : ''
   endfor
-  " custom_fileds
-  let issue.custom_fileds = []
+  " custom_fields
+  let issue.custom_fields = []
   let custom_fields = a:xml.childNode("custom_fields")
   if !empty(custom_fields)
     for field in custom_fields.childNodes('custom_field')
-      call add(issue.custom_fileds , {
+      call add(issue.custom_fields , {
             \ 'name'  : field.attr.name , 
             \ 'value' : field.value()
             \ })

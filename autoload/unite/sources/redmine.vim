@@ -27,7 +27,7 @@
 "
 call unite#util#set_default('g:unite_yarm_server_url'  , 'http://localhost:3000')
 call unite#util#set_default('g:unite_yarm_per_page'    , 25)
-call unite#util#set_default('g:unite_yarm_filed_order' , [
+call unite#util#set_default('g:unite_yarm_field_order' , [
       \ 'tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
       \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on'])
 call unite#util#set_default('g:unite_yarm_field_padding_len' , 15)
@@ -210,14 +210,14 @@ function! s:load_issue(issue, forcely)
   call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
   call add(fields , '')
   call add(fields , unite#yarm#rjust('[R][O][W]' , strwidth(fields[0])))
-  for v in g:unite_yarm_filed_order
+  for v in g:unite_yarm_field_order
     call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
                         \ . (has_key(a:issue , v) ? a:issue[v] : ''))
   endfor
   " append fields
   call append(0 , fields)
   " append custom fields
-  for custom in a:issue.custom_fileds
+  for custom in a:issue.custom_fields
     call append(line('$') - 1 , 
           \ unite#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
   endfor
