@@ -31,7 +31,8 @@ call unite#util#set_default('g:unite_yarm_field_order' , [
       \ 'tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
       \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on'])
 call unite#util#set_default('g:unite_yarm_field_padding_len' , 15)
-call unite#util#set_default('g:unite_yarm_abbr_fields' , [])
+call unite#util#set_default('g:unite_yarm_word_fields' , [])
+call unite#util#set_default('g:unite_yarm_word_custom_fields' , [])
 " hi - vimrc を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
 " フィールドと見なす行数
