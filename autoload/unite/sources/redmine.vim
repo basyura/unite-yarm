@@ -1,6 +1,6 @@
 " redmine source for unite.vim
-" Version:     0.1.4
-" Last Modified: 11 Dec 2010
+" Version:     0.1.5
+" Last Modified: 13 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -257,7 +257,7 @@ function! s:create_put_xml()
   let body_start = search('^$' , 'W')
   if body_start != 0
     " 最後の改行が削られるので \n を付ける
-    call desc.value(join(map(getline(body_start + 1 , '$') , "unite#yarm#escape(v:val)") , "\n") . "\n")
+    call desc.value(join(getline(body_start + 1 , '$') , "\n") . "\n")
   endif
   call s:add_updated_node(issue , 'start_date')
   call s:add_updated_node(issue , 'due_date')
