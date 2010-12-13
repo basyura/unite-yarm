@@ -1,6 +1,6 @@
 "
 " yarm.vim
-" Last Modified: 10 Dec 2010
+" Last Modified: 13 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -144,7 +144,15 @@ function! unite#yarm#to_issue(xml)
     endfor
   endif
   " unite_word
+  let issue.unite_abbr = '#' . issue.id . ' ' . issue.subject
   let issue.unite_word = '#' . issue.id . ' ' . issue.subject
+  " append extract condition
+  for v in g:unite_yarm_abbr_fields
+    if has_key(issue , v)
+      let issue.unite_word .= ' ' . issue[v]
+    endif
+  endfor
+
   " url for CRUD
   let rest_url = g:unite_yarm_server_url . '/issues/' . issue.id . '.xml?format=xml'
   if exists('g:unite_yarm_access_key')

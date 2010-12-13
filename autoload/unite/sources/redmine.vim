@@ -31,6 +31,7 @@ call unite#util#set_default('g:unite_yarm_filed_order' , [
       \ 'tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
       \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on'])
 call unite#util#set_default('g:unite_yarm_field_padding_len' , 15)
+call unite#util#set_default('g:unite_yarm_abbr_fields' , [])
 " hi - vimrc を読み込み直すと消えちゃう
 highlight yarm_ok guifg=white guibg=blue
 " フィールドと見なす行数
@@ -64,6 +65,7 @@ function! s:unite_source.gather_candidates(args, context)
   call unite#yarm#info('now caching issues ...')
   let s:candidates_cache = 
         \ map(unite#yarm#get_issues(option) , '{
+        \ "abbr"          : v:val.unite_abbr,
         \ "word"          : v:val.unite_word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
@@ -297,6 +299,7 @@ function! s:reget_issue(id)
   for cache in s:candidates_cache
     " update cache
     if cache.source__issue.id == a:id
+      let cache.abbr          = issue.unite_abbr
       let cache.word          = issue.unite_word
       let cache.source__issue = issue
       break
