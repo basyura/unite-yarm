@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.5
-" Last Modified: 13 Dec 2010
+" Last Modified: 17 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -138,6 +138,8 @@ function! s:redmine_issue_buffer_action()
   " update issue
   elseif hiid == 'yarm_tool_write'
     execute 'w'
+  else
+    execute "normal! \n"
   endif
 endfunction
 "
