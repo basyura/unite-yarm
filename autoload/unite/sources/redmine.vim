@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.5
-" Last Modified: 17 Dec 2010
+" Last Modified: 27 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -241,7 +241,10 @@ function! s:load_issue(issue, forcely)
     let b:unite_yarm_issue = a:issue
     " add put command
     if !exists('b:autocmd_put_issue')
-      autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
+      augroup unite_yarm_redmine_issue
+        autocmd!
+        autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
+      augroup END
     endif
     let b:autocmd_put_issue = 1
   endif

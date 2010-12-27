@@ -1,6 +1,6 @@
 "
 " yarm.vim
-" Last Modified: 13 Dec 2010
+" Last Modified: 24 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -64,26 +64,28 @@ endfunction
 "
 " padding  ljust
 "
-function! unite#yarm#ljust(str, size)
+function! unite#yarm#ljust(str, size, ...)
   let str = a:str
+  let c    = a:0 > 0 ? a:000[0] : ' '
   while 1
     if strwidth(str) >= a:size
       return str
     endif
-    let str .= ' '
+    let str .= c
   endwhile
   return str
 endfunction
 "
 " padding rjust
 "
-function! unite#yarm#rjust(str, size)
+function! unite#yarm#rjust(str, size, ...)
   let str = a:str
+  let c    = a:0 > 0 ? a:000[0] : ' '
   while 1
     if strwidth(str) >= a:size
       return str
     endif
-    let str = ' ' . str
+    let str = c . str
   endwhile
   return str
 endfunction
