@@ -1,6 +1,6 @@
 "
 " yarm.vim
-" Last Modified: 24 Dec 2010
+" Last Modified: 27 Dec 2010
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -122,7 +122,7 @@ endfunction
 "
 function! unite#yarm#open_browser(id)
   echohl yarm_ok 
-  execute "OpenBrowser " . g:unite_yarm_server_url . '/issues/' . a:id
+  execute "OpenBrowser " . s:server_url() . '/issues/' . a:id
   echohl None
 endfunction
 "
@@ -159,7 +159,7 @@ function! unite#yarm#to_issue(xml)
     let issue.unite_word .= ' ' . issue.custom_fields[v].value
   endfor
   " url for CRUD
-  let rest_url = g:unite_yarm_server_url . '/issues/' . issue.id . '.xml?format=xml'
+  let rest_url = s:server_url() . '/issues/' . issue.id . '.xml?format=xml'
   if exists('g:unite_yarm_access_key')
     let rest_url .= '&key=' . g:unite_yarm_access_key
   endif
@@ -171,7 +171,7 @@ endfunction
 " get issues with api
 "
 function! unite#yarm#get_issues(option)
-  let url = g:unite_yarm_server_url . '/issues.xml?' . 
+  let url = s:server_url() . '/issues.xml?' . 
                   \ 'per_page=' . g:unite_yarm_per_page
   if exists('g:unite_yarm_access_key')
     let url .= '&key=' . g:unite_yarm_access_key
@@ -185,7 +185,7 @@ function! unite#yarm#get_issues(option)
   let res = http#get(url)
   " server is not active
   if len(res.header) == 0
-    call unite#yarm#error('can not access ' . g:unite_yarm_server_url)
+    call unite#yarm#error('can not access ' . s:server_url())
     return []
   endif
   " check status code
@@ -204,9 +204,20 @@ endfunction
 " get issue with api
 "
 function! unite#yarm#get_issue(id)
-  let url = g:unite_yarm_server_url . '/issues/' . a:id . '.xml'
+  let url = s:server_url() . '/issues/' . a:id . '.xml'
   if exists('g:unite_yarm_access_key')
     let url .= '?key=' . g:unite_yarm_access_key
   endif
   return unite#yarm#to_issue(xml#parseURL(url))
 endfunction
+"
+" get sever url
+"
+" http://yarm.org  → http://yarm.org
+" http://yarm.org/ → http://yarm.org
+"
+function! s:server_url()
+  return substitute(g:unite_yarm_server_url , '/$' , '' , '')
+endfunction
+
+
