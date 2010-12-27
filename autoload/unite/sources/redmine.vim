@@ -177,6 +177,9 @@ function! s:redmine_put_issue()
   else
     redraw
     call unite#yarm#error('failed - ' . res.header[0])
+    for error in xml#parse(res.content).childNodes('error')
+      call unite#yarm#error('error : ' . error.value())
+    endfor
   endif
 endfunction
 " - private functions -
