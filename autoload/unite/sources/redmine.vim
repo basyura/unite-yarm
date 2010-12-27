@@ -195,9 +195,9 @@ function! s:load_issue(issue, forcely)
   " 強制上書きまたは隠れバッファ(ls!で表示されるもの)の場合
   " 一度消してから開きなおし
   if a:forcely || !buflisted(bufname)
-    "if bufno != -1
-      "execute 'bwipeout! ' . bufno
-    "endif
+    if bufno != -1
+      execute 'bwipeout! ' . bufno
+    endif
   " 存在する場合は表示
   else
     execute 'buffer ' . bufno
