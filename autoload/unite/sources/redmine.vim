@@ -66,8 +66,8 @@ function! s:unite_source.gather_candidates(args, context)
   call unite#yarm#info('now caching issues ...')
   let s:candidates_cache = 
         \ map(unite#yarm#get_issues(option) , '{
-        \ "abbr"          : v:val.unite_abbr,
-        \ "word"          : v:val.unite_word,
+        \ "abbr"          : v:val.abbr,
+        \ "word"          : v:val.word,
         \ "source"        : "redmine",
         \ "source__issue" : v:val,
         \ }')
@@ -308,8 +308,8 @@ function! s:reget_issue(id)
   for cache in s:candidates_cache
     " update cache
     if cache.source__issue.id == a:id
-      let cache.abbr          = issue.unite_abbr
-      let cache.word          = issue.unite_word
+      let cache.abbr          = issue.abbr
+      let cache.word          = issue.word
       let cache.source__issue = issue
       break
     endif

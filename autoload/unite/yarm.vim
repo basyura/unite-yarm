@@ -146,17 +146,17 @@ function! unite#yarm#to_issue(xml)
     endfor
   endif
   " unite_word
-  let issue.unite_abbr = '#' . issue.id . ' ' . issue.subject
-  let issue.unite_word = issue.unite_abbr
+  let issue.abbr = '#' . issue.id . ' ' . issue.subject
+  let issue.word = issue.abbr
   " append extract condition for fields
   for v in g:unite_yarm_word_fields
     if has_key(issue , v)
-      let issue.unite_word .= ' ' . issue[v]
+      let issue.word .= ' ' . issue[v]
     endif
   endfor
   " append extract condition for custom fields
   for v in g:unite_yarm_word_custom_fields
-    let issue.unite_word .= ' ' . issue.custom_fields[v].value
+    let issue.word .= ' ' . issue.custom_fields[v].value
   endfor
   " url for CRUD
   let rest_url = s:server_url() . '/issues/' . issue.id . '.xml?format=xml'
