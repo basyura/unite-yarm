@@ -104,8 +104,8 @@ endfunction
 "
 " autocmd
 "
-augroup RedmineGroup
-  autocmd! RedmineGroup
+augroup unite-yarm-issue-setting
+  autocmd!
   autocmd FileType redmine call s:redmine_issue_settings()
 augroup END  
 "
@@ -244,7 +244,7 @@ function! s:load_issue(issue, forcely)
     let b:unite_yarm_issue = a:issue
     " add put command
     if !exists('b:autocmd_put_issue')
-      augroup unite_yarm_redmine_issue
+      augroup unite_yarm_put_issue
         autocmd!
         autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
       augroup END
