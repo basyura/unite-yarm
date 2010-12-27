@@ -243,13 +243,10 @@ function! s:load_issue(issue, forcely)
     " cache issue for update
     let b:unite_yarm_issue = a:issue
     " add put command
-    if !exists('b:autocmd_put_issue')
-      augroup unite_yarm_put_issue
-        autocmd!
-        autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
-      augroup END
-    endif
-    let b:autocmd_put_issue = 1
+    augroup unite_yarm_put_issue
+      autocmd!
+      autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
+    augroup END
   endif
 
   " move cursor to top

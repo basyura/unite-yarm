@@ -66,7 +66,7 @@ endfunction
 "
 function! unite#yarm#ljust(str, size, ...)
   let str = a:str
-  let c    = a:0 > 0 ? a:000[0] : ' '
+  let c   = a:0 > 0 ? a:000[0] : ' '
   while 1
     if strwidth(str) >= a:size
       return str
@@ -80,7 +80,7 @@ endfunction
 "
 function! unite#yarm#rjust(str, size, ...)
   let str = a:str
-  let c    = a:0 > 0 ? a:000[0] : ' '
+  let c   = a:0 > 0 ? a:000[0] : ' '
   while 1
     if strwidth(str) >= a:size
       return str
