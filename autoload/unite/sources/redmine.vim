@@ -265,7 +265,7 @@ function! s:create_put_xml()
   let body_start = search('^$' , 'W')
   if body_start != 0
     " 最後の改行が削られるので \n を付ける
-    let body = join(getline(body_start + 1 , '$') , "\n") . "\n"
+    let body = join(getline(body_start + 1 , '$') , '') . ''
     let body = iconv(body , &enc , 'utf-8')
     call desc.value(body)
   endif
