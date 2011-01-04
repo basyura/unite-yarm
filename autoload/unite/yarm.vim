@@ -1,6 +1,6 @@
 "
 " yarm.vim
-" Last Modified: 27 Dec 2010
+" Last Modified: 04 Jan 2011
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -156,6 +156,9 @@ function! unite#yarm#to_issue(xml)
   endfor
   " append extract condition for custom fields
   for v in g:unite_yarm_word_custom_fields
+    if len(issue.custom_fields) <= v
+      continue
+    endif
     let issue.word .= ' ' . issue.custom_fields[v].value
   endfor
   " url for CRUD
