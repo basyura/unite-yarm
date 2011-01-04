@@ -26,7 +26,7 @@
 " variables
 "
 call unite#util#set_default('g:unite_yarm_server_url'  , 'http://localhost:3000')
-call unite#util#set_default('g:unite_yarm_per_page'    , 25)
+call unite#util#set_default('g:unite_yarm_limit'       , 25)
 call unite#util#set_default('g:unite_yarm_field_order' , [
       \ 'tracker', 'status', 'priority', 'author', 'assigned_to', 'start_date', 
       \ 'due_date', 'done_ratio', 'estimated_hours', 'spent_hours', 'created_on', 'updated_on'])

@@ -19,11 +19,11 @@ yet another redmine source for unite.vim
         トラッカーID (番号 or 識別子)
       assigned_to (or assigned)
         アサインID (番号 or 識別子)
-      per_page
+      limit
         検索対象チケット数
 
-    例1) Unite redmine:project_id=hoge:status_id=open:per_page=100
-    例2) Unite redmine:project=hoge:status=open:per_page=100
+    例1) Unite redmine:project_id=hoge:status_id=open:limit=100
+    例2) Unite redmine:project=hoge:status=open:limit=100
 
   Unite redmine:!
     キャッシュを破棄してチケットを取り直す
@@ -49,8 +49,8 @@ yet another redmine source for unite.vim
     定義されていない場合は更新不可
     更新できるのは redmine の head or stable branch を使用している場合だけ
 
-  let g:unite_yarm_per_page = 25
-    取得するチケットの数(25 or 50 or 100 しか効かないと思う)
+  let g:unite_yarm_limit = 25
+    取得するチケットの数
   
   let g:unite_yarm_backup_dir = '/tmp/yarm'
     バックアップ先ディレクトリ

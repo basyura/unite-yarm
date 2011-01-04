@@ -174,8 +174,8 @@ endfunction
 " get issues with api
 "
 function! unite#yarm#get_issues(option)
-  let url = s:server_url() . '/issues.xml?' . 
-                  \ 'limit=' . g:unite_yarm_per_page
+  let limit = get(a:option , 'limit' , g:unite_yarm_limit)
+  let url   = s:server_url() . '/issues.xml?limit=' . limit
   if exists('g:unite_yarm_access_key')
     let url .= '&key=' . g:unite_yarm_access_key
   endif
