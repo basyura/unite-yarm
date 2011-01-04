@@ -175,7 +175,7 @@ endfunction
 "
 function! unite#yarm#get_issues(option)
   let url = s:server_url() . '/issues.xml?' . 
-                  \ 'per_page=' . g:unite_yarm_per_page
+                  \ 'limit=' . g:unite_yarm_per_page
   if exists('g:unite_yarm_access_key')
     let url .= '&key=' . g:unite_yarm_access_key
   endif
