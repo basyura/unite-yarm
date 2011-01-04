@@ -1,6 +1,6 @@
 " redmine source for unite.vim
 " Version:     0.1.5
-" Last Modified: 27 Dec 2010
+" Last Modified: 04 Jan 2011
 " Author:      basyura <basyrua at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -208,8 +208,8 @@ function! s:load_issue(issue, forcely)
   silent %delete _
   setlocal bufhidden=hide
   setlocal noswapfile
-  setlocal fileencoding=utf-8 
-  setlocal fileformat=unix
+"  setlocal fileencoding=utf-8 
+"  setlocal fileformat=unix
   setfiletype redmine
   " append issue's fields
   let fields = []
@@ -265,7 +265,9 @@ function! s:create_put_xml()
   let body_start = search('^$' , 'W')
   if body_start != 0
     " 最後の改行が削られるので \n を付ける
-    call desc.value(join(getline(body_start + 1 , '$') , "\n") . "\n")
+    let body = join(getline(body_start + 1 , '$') , "\n") . "\n"
+    let body = iconv(body , &enc , 'utf-8')
+    call desc.value(body)
   endif
   call s:add_updated_node(issue , 'start_date')
   call s:add_updated_node(issue , 'due_date')
