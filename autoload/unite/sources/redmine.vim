@@ -24,6 +24,7 @@ let s:candidates_cache  = []
 "
 let s:unite_source      = {}
 let s:unite_source.name = 'redmine'
+let s:unite_source.is_volatile    = 1
 let s:unite_source.default_action = {'common' : 'open'}
 let s:unite_source.action_table   = {}
 " create list
@@ -35,19 +36,34 @@ function! s:unite_source.gather_candidates(args, context)
     let s:candidates_cache = []
   endif
   " return cache if exist
-  if !empty(s:candidates_cache)
-    return s:candidates_cache
+  if empty(s:candidates_cache)
+    " cache issues
+    call unite#yarm#info('now caching issues ...')
+    let s:candidates_cache = 
+          \ map(unite#yarm#get_issues(option) , '{
+          \ "abbr"          : v:val.abbr,
+          \ "word"          : v:val.word,
+          \ "source"        : "redmine",
+          \ "source__issue" : v:val,
+          \ "source__type"  : "cache",
+          \ }')
   endif
-  " cache issues
-  call unite#yarm#info('now caching issues ...')
-  let s:candidates_cache = 
-        \ map(unite#yarm#get_issues(option) , '{
-        \ "abbr"          : v:val.abbr,
-        \ "word"          : v:val.word,
-        \ "source"        : "redmine",
-        \ "source__issue" : v:val,
-        \ }')
-  return s:candidates_cache
+  " 返却用のキャッシュ
+  let cache = deepcopy(s:candidates_cache)
+  " add get issue candidate
+  let ward  = substitute(a:context.input, '\*', '', 'g')
+  if ward =~ '^#\d\+'
+    let no = substitute(ward, '#', '', 'g')
+    call add(cache , {
+          \ 'abbr'          : '[get] #' . no ,
+          \ 'word'          : '#' . no ,
+          \ 'source'        : 'redmine' ,
+          \ "source__issue" : {'id' : no} ,
+          \ "source__type"  : "get",
+          \ })
+  endif
+  
+  return cache
 endfunction
 "
 " action table
@@ -59,7 +75,43 @@ let s:unite_source.action_table.common = s:action_table
 "
 let s:action_table.open = {'description' : 'open issue'}
 function! s:action_table.open.func(candidate)
-  call s:load_issue(a:candidate.source__issue , 0)
+  let issue = a:candidate.source__issue
+  " cache manager 作るかなぁ
+  if a:candidate.source__type == 'get'
+    if !s:is_cached(issue.id)
+      try
+        let issue = unite#yarm#get_issue(issue.id)
+        call add(s:candidates_cache , {
+              \ "abbr"          : issue.abbr,
+              \ "word"          : issue.word,
+              \ "source"        : "redmine",
+              \ "source__issue" : issue,
+              \ "source__type"  : "cache",
+              \ })
+        call sort(s:candidates_cache , 's:compare_no')
+      catch
+        call unite#yarm#error('no issue : #' . issue.id)
+        return
+      endtry
+    endif
+  endif
+
+  call s:load_issue(issue , 0)
+endfunction
+
+function! s:is_cached(id)
+  for cache in s:candidates_cache
+    if cache.source__issue.id == a:id
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
+"
+" compare_no
+"
+function! s:compare_no(i1, i2)
+  return a:i2.source__issue.id - a:i1.source__issue.id
 endfunction
 "
 " action - browser
