@@ -24,7 +24,6 @@ let s:candidates_cache  = []
 "
 let s:unite_source      = {}
 let s:unite_source.name = 'redmine'
-let s:unite_source.is_volatile    = 1
 let s:unite_source.default_action = {'common' : 'open'}
 let s:unite_source.action_table   = {}
 " create list
@@ -32,38 +31,39 @@ function! s:unite_source.gather_candidates(args, context)
   " parse args
   let option = unite#yarm#parse_args(a:args)
   " clear cache. option に判定メソッドを持たせたい
-  if len(option) != 0
-    let s:candidates_cache = []
+  if len(option) == 0 && !empty(s:candidates_cache)
+    return s:candidates_cache
   endif
-  " return cache if exist
-  if empty(s:candidates_cache)
-    " cache issues
-    call unite#yarm#info('now caching issues ...')
-    let s:candidates_cache = 
-          \ map(unite#yarm#get_issues(option) , '{
-          \ "abbr"          : v:val.abbr,
-          \ "word"          : v:val.word,
-          \ "source"        : "redmine",
-          \ "source__issue" : v:val,
-          \ "source__type"  : "cache",
-          \ }')
-  endif
-  " 返却用のキャッシュ
-  let cache = deepcopy(s:candidates_cache)
-  " add get issue candidate
-  let ward  = substitute(a:context.input, '\*', '', 'g')
-  if ward =~ '^#\d\+'
-    let no = substitute(ward, '#', '', 'g')
-    call add(cache , {
+  " cache issues
+  call unite#yarm#info('now caching issues ...')
+  let s:candidates_cache = 
+        \ map(unite#yarm#get_issues(option) , '{
+        \ "abbr"          : v:val.abbr,
+        \ "word"          : v:val.word,
+        \ "source"        : "redmine",
+        \ "source__issue" : v:val,
+        \ "source__type"  : "cache",
+        \ }')
+
+  return s:candidates_cache
+endfunction
+"
+" add source with input 
+"
+function! s:unite_source.change_candidates(args, context)
+  let word  = substitute(a:context.input, '\*', '', 'g')
+  if word =~ '^#\d\+'
+    let no = substitute(word, '#', '', 'g')
+    return [{
           \ 'abbr'          : '[get] #' . no ,
           \ 'word'          : '#' . no ,
           \ 'source'        : 'redmine' ,
           \ "source__issue" : {'id' : no} ,
           \ "source__type"  : "get",
-          \ })
+          \ }]
+  else
+    return []
   endif
-  
-  return cache
 endfunction
 "
 " action table
