@@ -93,6 +93,8 @@ function! s:action_table.open.func(candidate)
         call unite#yarm#error('no issue : #' . issue.id)
         return
       endtry
+    else
+      let issue = unite#yarm#get_issue(issue.id)
     endif
   endif
 
