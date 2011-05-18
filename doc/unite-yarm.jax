@@ -29,6 +29,7 @@ License: MIT license  {{{
 パラメータ		|unite-yarm-parameter|
 アクション		|unite-yarm-action|
 変数			|unite-yarm-variables|
+その他                  |unite-yarm-others|
 
 ==============================================================================
 概要							*unite-yarm-introduction*
@@ -181,6 +182,24 @@ g:unite_yarm_per_page					*g:unite_yarm_per_page*
 g:unite_yarm_backup_dir					*g:unite_yarm_backup_dir*
 	バックアップ先ディレクトリ
 	定義されていない場合はバックアップしない
+
+
+==============================================================================
+その他							|unite-yarm-others|
+
+outline
+	unite-outline をインストールしている場合、
+	アウトラインを表示することができる
+
+		:Unite outline
+
+該当チケットの取得
+	チケットの絞り込みで #999 (#チケット番号) を入力すると候補に
+
+		[get] #999 
+
+	が表示される。これを選択することにより該当チケットを表示する
+	ことができる。
 
 
 ==============================================================================
