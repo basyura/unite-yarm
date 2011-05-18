@@ -1,5 +1,5 @@
 
-function! unite#sources#outline#redmine#outline_info()
+function! unite#sources#outline#yarm#outline_info()
   return s:outline_info
 endfunction
 

@@ -16,14 +16,14 @@ let s:field_row = 3
 "
 " source
 "
-function! unite#sources#redmine#define()
+function! unite#sources#yarm#define()
   return s:unite_source
 endfunction
 " cache
 let s:candidates_cache  = []
 "
 let s:unite_source      = {}
-let s:unite_source.name = 'redmine'
+let s:unite_source.name = 'yarm'
 let s:unite_source.default_action = {'common' : 'open'}
 let s:unite_source.action_table   = {}
 " create list
@@ -40,7 +40,7 @@ function! s:unite_source.gather_candidates(args, context)
         \ map(unite#yarm#get_issues(option) , '{
         \ "abbr"          : v:val.abbr,
         \ "word"          : v:val.word,
-        \ "source"        : "redmine",
+        \ "source"        : "yarm",
         \ "source__issue" : v:val,
         \ "source__type"  : "cache",
         \ }')
@@ -57,7 +57,7 @@ function! s:unite_source.change_candidates(args, context)
     return [{
           \ 'abbr'          : '[get] #' . no ,
           \ 'word'          : '#' . no ,
-          \ 'source'        : 'redmine' ,
+          \ 'source'        : 'yarm' ,
           \ "source__issue" : {'id' : no} ,
           \ "source__type"  : "get",
           \ }]
@@ -84,7 +84,7 @@ function! s:action_table.open.func(candidate)
         call add(s:candidates_cache , {
               \ "abbr"          : issue.abbr,
               \ "word"          : issue.word,
-              \ "source"        : "redmine",
+              \ "source"        : "yarm",
               \ "source__issue" : issue,
               \ "source__type"  : "cache",
               \ })
@@ -134,18 +134,18 @@ endfunction
 "
 augroup unite-yarm-issue-setting
   autocmd!
-  autocmd FileType redmine call s:redmine_issue_settings()
+  autocmd FileType yarm call s:yarm_issue_settings()
 augroup END  
 "
-" redmine_issue_settings
+" yarm_issue_settings
 "
-function! s:redmine_issue_settings()
-  nmap <silent> <buffer> <CR> :call <SID>redmine_issue_buffer_action()<CR>
+function! s:yarm_issue_settings()
+  nmap <silent> <buffer> <CR> :call <SID>yarm_issue_buffer_action()<CR>
 endfunction
 "
-" redmine_issue_buffer_action
+" yarm_issue_buffer_action
 "
-function! s:redmine_issue_buffer_action()
+function! s:yarm_issue_buffer_action()
   let matched = matchlist(expand('<cWORD>') , 'https\?://\S\+')
   if len(matched) != 0
     echohl yarm_ok | execute "OpenBrowser " . matched[0] | echohl None
@@ -171,9 +171,9 @@ function! s:redmine_issue_buffer_action()
   endif
 endfunction
 "
-" redmine_put_issue
+" yarm_put_issue
 "
-function! s:redmine_put_issue()
+function! s:yarm_put_issue()
   echohl yarm_ok
   if input('update ? (y/n) : ') != 'y'
     return unite#yarm#info('update was canceled')
@@ -218,7 +218,7 @@ endfunction
 " forcely : 強制的に内容を書き換えるか
 "
 function! s:load_issue(issue, forcely)
-  let bufname = 'redmine_' . a:issue.id 
+  let bufname = 'yarm_' . a:issue.id 
   let bufno   = bufnr(bufname . "$")
   " 強制上書きまたは隠れバッファ(ls!で表示されるもの)の場合
   " 一度消してから開きなおし
@@ -238,7 +238,7 @@ function! s:load_issue(issue, forcely)
   setlocal noswapfile
 "  setlocal fileencoding=utf-8 
 "  setlocal fileformat=unix
-  setfiletype redmine
+  setfiletype yarm
   " append issue's fields
   let fields = []
   call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
@@ -272,7 +272,7 @@ function! s:load_issue(issue, forcely)
     let b:unite_yarm_issue = a:issue
     " add put command
     if !exists('b:unite_yarm_bufwrite_cmd')
-      autocmd BufWriteCmd <buffer> call <SID>redmine_put_issue()
+      autocmd BufWriteCmd <buffer> call <SID>yarm_put_issue()
       let b:unite_yarm_bufwrite_cmd = 1
     endif
   endif
