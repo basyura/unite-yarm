@@ -68,13 +68,13 @@ redmine
 	open-browser.vim
 	https://github.com/tyru/open-browser.vim
 
-インストールに成功すると、:Unite redmine で実行できる。
+インストールに成功すると、:Unite yarm で実行できる。
 アクセスするサーバの指定は |unite-yarm-variables| を参照
 
 ==============================================================================
 使い方							*unite-yarm-usage*
 
-:Unite redmine
+:Unite yarm
 	
 	チケット一覧の表示
 	一覧からチケットを選択すると内容を表示する
@@ -147,9 +147,9 @@ redmine
 	per_page
 	検索対象チケット数
 
-	例1) Unite redmine:project_id=hoge:status_id=open:per_page=100
-	例2) Unite redmine:project=hoge:status=open:per_page=100
-	例3) Unite redmine:!
+	例1) Unite yarm:project_id=hoge:status_id=open:per_page=100
+	例2) Unite yarm:project=hoge:status=open:per_page=100
+	例3) Unite yarm:!
 
 ==============================================================================
 アクション						*unite-yarm-action*

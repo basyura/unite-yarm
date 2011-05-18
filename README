@@ -28,7 +28,7 @@ yet another redmine source for unite.vim
 
 使い方
 
-  Unite redmine
+  Unite yarm
     チケット一覧の表示(かつ、一覧をキャッシュ)
     キャッシュがあればそれを表示
 
@@ -46,10 +46,10 @@ yet another redmine source for unite.vim
       limit
         検索対象チケット数
 
-    例1) Unite redmine:project_id=hoge:status_id=open:limit=100
-    例2) Unite redmine:project=hoge:status=open:limit=100
+    例1) Unite yarm:project_id=hoge:status_id=open:limit=100
+    例2) Unite yarm:project=hoge:status=open:limit=100
 
-  Unite redmine:!
+  Unite yarm:!
     キャッシュを破棄してチケットを取り直す
 
 アクション
