@@ -20,6 +20,9 @@ function! unite#yarm#parse_args(args)
         \ }
   let option = {}
   for arg in a:args
+    if arg == ""
+      continue
+    endif
     let v = split(arg , '=')
     let v[0] = has_key(convert_def , v[0]) ? convert_def[v[0]] : v[0]
     let option[v[0]] = len(v) == 1 ? 1 : v[1]
