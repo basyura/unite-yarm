@@ -198,7 +198,8 @@ function! s:yarm_put_issue()
   let res   = http#post(issue.rest_url , s:create_put_xml() , 
                           \ {'Content-Type' : 'text/xml'} , 'PUT')
   " split HTTP/1.0 200 OK
-  if split(res.header[0])[1] == '200'
+  let status = split(res.header[0])[1]
+  if status == '200' || status == '100'
     " :wq 保存して閉じる 
     " :w  チケットを取り直して再描画
     redraw
