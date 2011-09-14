@@ -3,6 +3,8 @@ if exists('b:current_syntax')
   finish
 endif
 
+runtime! syntax/textile.vim
+
 syntax match yarm_title "^<< .* >>$"
 
 syntax match yarm_tool_reload '\[R\]'
