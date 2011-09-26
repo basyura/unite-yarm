@@ -28,8 +28,7 @@ syntax match yarm_field "^done_ratio\s\+: "
 syntax match yarm_field "^created_on\s\+: "
 syntax match yarm_field "^updated_on\s\+: "
 
-syntax match yarm_h2 "^h2\..*"
-syntax match yarm_h3 "^h3\..*"
+syntax match yarm_wiki_link "[[.*?]]"
 
 syntax region yarm_pre start="<pre>"  end="</pre>" 
 
@@ -39,9 +38,8 @@ highlight default link yarm_tool_open   String
 highlight default link yarm_tool_write  String
 highlight default link yarm_link        Underlined
 highlight default link yarm_field       Constant
-highlight default link yarm_h2          Underlined
-highlight default link yarm_h3          Statement
 highlight default link yarm_pre         Type
+highlight default link yarm_wiki_link   Underlined
 
 highlight yarm_ok guifg=white guibg=blue
 
