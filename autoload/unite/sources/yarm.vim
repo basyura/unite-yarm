@@ -263,11 +263,6 @@ function! s:load_issue(issue, forcely)
   endfor
   " append fields
   call append(0 , fields)
-  " append custom fields
-"  for custom in a:issue.custom_fields
-"    call append(line('$') - 1 , 
-"          \ unite#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
-"  endfor
   " add description
   for line in split(a:issue.description,"\n")
     call append(line('$') , substitute(line , '' , '' , 'g'))

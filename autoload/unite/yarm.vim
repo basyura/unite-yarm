@@ -109,39 +109,8 @@ endfunction
 "
 function! unite#yarm#to_issue(issue)
   let issue = a:issue
-"  let issue = {}
-"  for node in a:xml.childNodes()
-"    let issue[node.name] = empty(node.attr) ? node.value() : 
-"          \ has_key(node.attr , 'name') ? node.attr.name : ''
-"  endfor
-"  " custom_fields
-"  let issue.custom_fields = []
-"  let custom_fields = a:xml.childNode("custom_fields")
-"  if !empty(custom_fields)
-"    for field in custom_fields.childNodes('custom_field')
-"      call add(issue.custom_fields , {
-"            \ 'name'  : field.attr.name , 
-"            \ 'value' : field.value()
-"            \ })
-"    endfor
-"  endif
-"  " unite_word
   let issue.abbr = '#' . issue.id . ' ' . issue.subject
   let issue.word = issue.abbr
-  " append extract condition for fields
-" for v in g:unite_yarm_word_fields
-"   if has_key(issue , v)
-"     let issue.word .= ' ' . issue[v]
-"   endif
-" endfor
-  " append extract condition for custom fields
-" for v in g:unite_yarm_word_custom_fields
-"   if len(issue.custom_fields) <= v
-"     continue
-"   endif
-"   let issue.word .= ' ' . issue.custom_fields[v].value
-" endfor
-  " url for CRUD
   " TODO
   let rest_url = s:server_url() . '/issues/' . issue.id . '.json?format=json'
   if exists('g:unite_yarm_access_key')
