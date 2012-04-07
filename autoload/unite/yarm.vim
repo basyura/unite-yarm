@@ -105,43 +105,45 @@ function! unite#yarm#open_browser(id)
   echohl None
 endfunction
 "
-" xml to issue
+" json to issue
 "
-function! unite#yarm#to_issue(xml)
-  let issue = {}
-  for node in a:xml.childNodes()
-    let issue[node.name] = empty(node.attr) ? node.value() : 
-          \ has_key(node.attr , 'name') ? node.attr.name : ''
-  endfor
-  " custom_fields
-  let issue.custom_fields = []
-  let custom_fields = a:xml.childNode("custom_fields")
-  if !empty(custom_fields)
-    for field in custom_fields.childNodes('custom_field')
-      call add(issue.custom_fields , {
-            \ 'name'  : field.attr.name , 
-            \ 'value' : field.value()
-            \ })
-    endfor
-  endif
-  " unite_word
+function! unite#yarm#to_issue(issue)
+  let issue = a:issue
+"  let issue = {}
+"  for node in a:xml.childNodes()
+"    let issue[node.name] = empty(node.attr) ? node.value() : 
+"          \ has_key(node.attr , 'name') ? node.attr.name : ''
+"  endfor
+"  " custom_fields
+"  let issue.custom_fields = []
+"  let custom_fields = a:xml.childNode("custom_fields")
+"  if !empty(custom_fields)
+"    for field in custom_fields.childNodes('custom_field')
+"      call add(issue.custom_fields , {
+"            \ 'name'  : field.attr.name , 
+"            \ 'value' : field.value()
+"            \ })
+"    endfor
+"  endif
+"  " unite_word
   let issue.abbr = '#' . issue.id . ' ' . issue.subject
   let issue.word = issue.abbr
   " append extract condition for fields
-  for v in g:unite_yarm_word_fields
-    if has_key(issue , v)
-      let issue.word .= ' ' . issue[v]
-    endif
-  endfor
+" for v in g:unite_yarm_word_fields
+"   if has_key(issue , v)
+"     let issue.word .= ' ' . issue[v]
+"   endif
+" endfor
   " append extract condition for custom fields
-  for v in g:unite_yarm_word_custom_fields
-    if len(issue.custom_fields) <= v
-      continue
-    endif
-    let issue.word .= ' ' . issue.custom_fields[v].value
-  endfor
+" for v in g:unite_yarm_word_custom_fields
+"   if len(issue.custom_fields) <= v
+"     continue
+"   endif
+"   let issue.word .= ' ' . issue.custom_fields[v].value
+" endfor
   " url for CRUD
-  let rest_url = s:server_url() . '/issues/' . issue.id . '.xml?format=xml'
+  " TODO
+  let rest_url = s:server_url() . '/issues/' . issue.id . '.json?format=json'
   if exists('g:unite_yarm_access_key')
     let rest_url .= '&key=' . g:unite_yarm_access_key
   endif
@@ -154,7 +156,7 @@ endfunction
 "
 function! unite#yarm#get_issues(option)
   let limit = get(a:option , 'limit' , g:unite_yarm_limit)
-  let url   = s:server_url() . '/issues.xml?limit=' . limit
+  let url   = s:server_url() . '/issues.json?limit=' . limit
   if exists('g:unite_yarm_access_key')
     let url .= '&key=' . g:unite_yarm_access_key
   endif
@@ -177,8 +179,8 @@ function! unite#yarm#get_issues(option)
   endif
   " convert xml to dict
   let issues = []
-  for dom in xml#parse(res.content).childNodes('issue')
-    call add(issues , unite#yarm#to_issue(dom))
+  for issue in json#decode(res.content).issues
+    call add(issues , unite#yarm#to_issue(issue))
   endfor
   return issues
 endfunction
@@ -186,11 +188,11 @@ endfunction
 " get issue with api
 "
 function! unite#yarm#get_issue(id)
-  let url = s:server_url() . '/issues/' . a:id . '.xml'
+  let url = s:server_url() . '/issues/' . a:id . '.json'
   if exists('g:unite_yarm_access_key')
     let url .= '?key=' . g:unite_yarm_access_key
   endif
-  return unite#yarm#to_issue(xml#parseURL(url))
+  return unite#yarm#to_issue(json#decode(http#get(url).content).issue)
 endfunction
 "
 " get sever url

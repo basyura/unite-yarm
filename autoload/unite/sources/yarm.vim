@@ -207,8 +207,8 @@ function! s:yarm_put_issue()
   " backup
   call unite#yarm#backup_issue(pre)
   " put issue
-  let res   = http#post(issue.rest_url , s:create_put_xml() , 
-                          \ {'Content-Type' : 'text/xml'} , 'PUT')
+  let res   = http#post(issue.rest_url , s:create_put_json() , 
+                          \ {'Content-Type' : 'application/json'} , 'PUT')
   " split HTTP/1.0 200 OK
   let status = split(res.header[0])[1]
   if status == '200' || status == '100'
@@ -220,9 +220,9 @@ function! s:yarm_put_issue()
   else
     redraw
     call unite#yarm#error('failed - ' . res.header[0])
-    for error in xml#parse(res.content).childNodes('error')
-      call unite#yarm#error('error : ' . error.value())
-    endfor
+    "for error in json#decode(res.content).error
+    "  call unite#yarm#error('error : ' . error.value())
+    "endfor
   endif
 endfunction
 " - private functions -
@@ -246,8 +246,8 @@ function! s:load_issue(issue, forcely)
     execute 'buffer ' . bufno
     return
   endif
-
   exec 'edit! ' . bufname
+  let b:unite_yarm_issue_origin = a:issue
   silent %delete _
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -256,20 +256,20 @@ function! s:load_issue(issue, forcely)
   setfiletype yarm
   " append issue's fields
   let fields = []
-  call add(fields , '<< ' . a:issue.project . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
+  call add(fields , '<< ' . a:issue.project.name . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
   call add(fields , '')
   call add(fields , unite#yarm#rjust('[R][O][W]' , strwidth(fields[0])))
-  for v in g:unite_yarm_field_order
-    call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
-                        \ . (has_key(a:issue , v) ? a:issue[v] : ''))
-  endfor
+"  for v in g:unite_yarm_field_order
+"    call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
+"                        \ . (has_key(a:issue , v) ? a:issue[v] : ''))
+"  endfor
   " append fields
   call append(0 , fields)
   " append custom fields
-  for custom in a:issue.custom_fields
-    call append(line('$') - 1 , 
-          \ unite#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
-  endfor
+"  for custom in a:issue.custom_fields
+"    call append(line('$') - 1 , 
+"          \ unite#yarm#ljust(custom.name , g:unite_yarm_field_padding_len) . ' : ' . custom.value)
+"  endfor
   " add description
   for line in split(a:issue.description,"\n")
     call append(line('$') , substitute(line , '' , '' , 'g'))
@@ -300,25 +300,31 @@ endfunction
 " create_pu_xml
 " 2行目以降にある改行だけの行以降を description とみなす
 "
-function! s:create_put_xml()
-  let issue = xml#createElement('issue')
-  let desc  = xml#createElement('description')
-  call add(issue.child , desc)
+function! s:create_put_json()
+
+" let issue = xml#createElement('issue')
+" let desc  = xml#createElement('description')
+" call add(issue.child , desc)
   execute ":" . s:field_row
+
+  let issue = {}
+
   let body_start = search('^$' , 'W')
   if body_start != 0
     " 最後の改行が削られるので \n を付ける
     let body = join(getline(body_start + 1 , '$') , '') . ''
     let body = iconv(body , &enc , 'utf-8')
-    call desc.value(body)
+    let issue.description = body
   endif
-  call s:add_updated_node(issue , 'start_date')
-  call s:add_updated_node(issue , 'due_date')
-  call s:add_updated_node(issue , 'done_ratio')
+
+" call s:add_updated_node(issue , 'start_date')
+" call s:add_updated_node(issue , 'due_date')
+" call s:add_updated_node(issue , 'done_ratio')
   "call s:add_updated_node(issue , 'estimated_hours')
   "call s:add_updated_node(issue , 'spent_hours')
 
-  return issue.toString()
+  let issue = {'issue' : issue }
+  return json#encode(issue)
 endfunction
 "
 "
