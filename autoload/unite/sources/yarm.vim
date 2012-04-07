@@ -196,6 +196,7 @@ function! s:yarm_put_issue()
   " cached issue
   let issue = b:unite_yarm_issue
   " i want display progress
+  redraw
   call unite#yarm#info('now updating #' . issue.id . ' ...')
   " reget lastest issue
   let pre   = unite#yarm#get_issue(issue.id)
@@ -259,10 +260,10 @@ function! s:load_issue(issue, forcely)
   call add(fields , '<< ' . a:issue.project.name . ' - #' . a:issue.id . ' ' . a:issue.subject . ' >>')
   call add(fields , '')
   call add(fields , unite#yarm#rjust('[R][O][W]' , strwidth(fields[0])))
-"  for v in g:unite_yarm_field_order
-"    call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
-"                        \ . (has_key(a:issue , v) ? a:issue[v] : ''))
-"  endfor
+  for v in g:unite_yarm_field_order
+    call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
+                        \ . s:get_field_value(v, a:issue))
+  endfor
   " append fields
   call append(0 , fields)
   " append custom fields
@@ -363,4 +364,18 @@ function! s:reget_issue(id)
     endif
   endfor
   return issue
+endfunction
+"
+"
+"
+function! s:get_field_value(name, issue)
+  if !has_key(a:issue , a:name)
+    return ''
+  endif
+  let value = a:issue[a:name]
+  if type(value) == 4
+    return value.name
+  else
+    return string(value)
+  endif
 endfunction
