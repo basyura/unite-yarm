@@ -12,9 +12,6 @@ call unite#util#set_default('g:unite_yarm_field_order' , [
       \ 'assigned_to',
       \ 'start_date', 
       \ 'due_date',
-      \ 'done_ratio',
-      \ 'estimated_hours',
-      \ 'spent_hours',
       \ 'created_on',
       \ 'updated_on'
       \ ])
@@ -262,7 +259,7 @@ function! s:load_issue(issue, forcely)
   call add(fields , unite#yarm#rjust('[R][O][W]' , strwidth(fields[0])))
   for v in g:unite_yarm_field_order
     call add(fields , unite#yarm#ljust(v , g:unite_yarm_field_padding_len) . ' : ' 
-                        \ . s:get_field_value(v, a:issue))
+                        \ . s:get_field_value(a:issue, v))
   endfor
   " append fields
   call append(0 , fields)
@@ -303,11 +300,8 @@ endfunction
 "
 function! s:create_put_json()
 
-" let issue = xml#createElement('issue')
-" let desc  = xml#createElement('description')
-" call add(issue.child , desc)
   execute ":" . s:field_row
-
+  " create issue only for update
   let issue = {}
 
   let body_start = search('^$' , 'W')
@@ -318,9 +312,9 @@ function! s:create_put_json()
     let issue.description = body
   endif
 
-" call s:add_updated_node(issue , 'start_date')
-" call s:add_updated_node(issue , 'due_date')
-" call s:add_updated_node(issue , 'done_ratio')
+  "call s:add_updated_node(issue , 'start_date')
+  "call s:add_updated_node(issue , 'due_date')
+  "call s:add_updated_node(issue , 'done_ratio')
   "call s:add_updated_node(issue , 'estimated_hours')
   "call s:add_updated_node(issue , 'spent_hours')
 
@@ -332,11 +326,12 @@ endfunction
 "
 function! s:add_updated_node(issue, field_name)
   execute ":" . s:field_row
+  if !has_key(b:unite_yarm_issue, a:field_name)
+    return
+  endif
   let value = s:get_field(a:field_name)
   if value != b:unite_yarm_issue[a:field_name]
-    let node = xml#createElement(a:field_name)
-    call node.value(value)
-    call add(a:issue.child , node)
+    let a:issue[a:field_name] = value
   endif
 endfunction
 "
@@ -368,14 +363,11 @@ endfunction
 "
 "
 "
-function! s:get_field_value(name, issue)
+function! s:get_field_value(issue, name)
   if !has_key(a:issue , a:name)
     return ''
   endif
   let value = a:issue[a:name]
-  if type(value) == 4
-    return value.name
-  else
-    return string(value)
-  endif
+  let ret   = type(value) == 4 ? value.name : value
+  return substitute(ret, "'", '', 'g')
 endfunction
