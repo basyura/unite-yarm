@@ -112,7 +112,7 @@ function! unite#yarm#to_issue(issue)
   let issue.abbr = '#' . issue.id . ' ' . issue.subject
   let issue.word = issue.abbr
   " TODO
-  let rest_url = s:server_url() . '/issues/' . issue.id . '.json?format=json'
+  let rest_url = s:server_url() . '/issues/' . issue.id . '.json?format=json?include=journals'
   if exists('g:unite_yarm_access_key')
     let rest_url .= '&key=' . g:unite_yarm_access_key
   endif
@@ -135,7 +135,7 @@ function! unite#yarm#get_issues(option)
     endif
     let url .= '&' . key . '=' . a:option[key]
   endfor
-  let res = http#get(url)
+  let res = webapi#http#get(url)
   " server is not active
   if len(res.header) == 0
     call unite#yarm#error('can not access ' . s:server_url())
@@ -148,7 +148,7 @@ function! unite#yarm#get_issues(option)
   endif
   " convert xml to dict
   let issues = []
-  for issue in json#decode(res.content).issues
+  for issue in webapi#json#decode(res.content).issues
     call add(issues , unite#yarm#to_issue(issue))
   endfor
   return issues
@@ -161,7 +161,7 @@ function! unite#yarm#get_issue(id)
   if exists('g:unite_yarm_access_key')
     let url .= '?key=' . g:unite_yarm_access_key
   endif
-  return unite#yarm#to_issue(json#decode(http#get(url).content).issue)
+  return unite#yarm#to_issue(webapi#json#decode(webapi#http#get(url).content).issue)
 endfunction
 "
 " get sever url

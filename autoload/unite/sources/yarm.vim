@@ -205,7 +205,7 @@ function! s:yarm_put_issue()
   " backup
   call unite#yarm#backup_issue(pre)
   " put issue
-  let res   = http#post(issue.rest_url , s:create_put_json() , 
+  let res   = webapi#http#post(issue.rest_url , s:create_put_json() , 
                           \ {'Content-Type' : 'application/json'} , 'PUT')
   " split HTTP/1.0 200 OK
   let status = split(res.header[0])[1]
@@ -314,7 +314,7 @@ function! s:create_put_json()
   "call s:add_updated_node(issue , 'spent_hours')
 
   let issue = {'issue' : issue }
-  return json#encode(issue)
+  return webapi#json#encode(issue)
 endfunction
 "
 "
