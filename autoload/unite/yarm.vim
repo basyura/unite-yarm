@@ -129,8 +129,6 @@ function! unite#yarm#get_issues(option)
   if exists('g:unite_yarm_access_key')
     let url .= '&key=' . g:unite_yarm_access_key
   endif
-  let url .= '&per_page=' . get(g:, 'unite_yarm_per_page', '25')
-
   for key in keys(a:option)
     if a:option[key] == ''
       continue
