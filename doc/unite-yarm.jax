@@ -145,11 +145,11 @@ redmine
 	assigned_to (or assigned)
 	アサインID (番号 or 識別子)
 
-	per_page
+	limit
 	検索対象チケット数
 
-	例1) Unite yarm:project_id=hoge:status_id=open:per_page=100
-	例2) Unite yarm:project=hoge:status=open:per_page=100
+	例1) Unite yarm:project_id=hoge:status_id=open:limit=100
+	例2) Unite yarm:project=hoge:status=open:limit=100
 	例3) Unite yarm:!
 
 ==============================================================================
@@ -176,7 +176,7 @@ g:unite_yarm_access_key					*g:unite_yarm_access_key*
 	定義されていない場合は更新不可
 	更新できるのは redmine の head or stable branch を使用している場合だけ
 
-g:unite_yarm_per_page					*g:unite_yarm_per_page*
+g:unite_yarm_limit   					*g:unite_yarm_limi*
 	取得するチケットの数(25 or 50 or 100 しか効かないと思う)
   
 g:unite_yarm_backup_dir					*g:unite_yarm_backup_dir*
